@@ -395,120 +395,132 @@
             </p>
         </div>
     </div>
-    
     <script>
-        // DOM Elements
-        const phoneInput = document.getElementById('phone');
-        const generateBtn = document.getElementById('generateBtn');
-        const btnText = document.getElementById('btnText');
-        const btnSpinner = document.getElementById('btnSpinner');
-        const loader = document.getElementById('loader');
-        const result = document.getElementById('result');
-        const pairCode = document.getElementById('pairCode');
-        const copyBtn = document.getElementById('copyBtn');
-        const newBtn = document.getElementById('newBtn');
-        const success = document.getElementById('success');
-        const connected = document.getElementById('connected');
-        const error = document.getElementById('error');
+    // DOM Elements
+    const elements = {
+        submit: document.getElementById('submit'),
+        phoneNumber: document.getElementById('phone-number'),
+        result: document.getElementById('result'),
+        pairCode: document.getElementById('pair-code'),
+        copyBtn: document.getElementById('copy-btn'),
+        newBtn: document.getElementById('new-btn'),
+        errorMessage: document.getElementById('error-message'),
+        successMessage: document.getElementById('success-message'),
+        loadingSpinner: document.getElementById('loading-spinner'),
+        connectionSuccess: document.getElementById('connection-success'),
+        btnText: document.getElementById('btn-text'),
+        btnSpinner: document.getElementById('btn-spinner')
+    };
+
+    // Validation
+    function validatePhoneNumber(number) {
+        const cleaned = number.replace(/\s/g, '').replace(/\D/g, '');
+        return cleaned.length >= 10 && cleaned.length <= 15;
+    }
+
+    // Format phone number
+    function formatPhoneNumber(input) {
+        let value = input.replace(/\D/g, '');
+        return value;
+    }
+
+    // Event Listeners
+    elements.phoneNumber.addEventListener('input', (e) => {
+        e.target.value = formatPhoneNumber(e.target.value);
+        if (elements.errorMessage.style.display === 'block') {
+            elements.errorMessage.style.display = 'none';
+        }
+    });
+
+    elements.submit.addEventListener('click', async () => {
+        const phoneNumber = elements.phoneNumber.value;
         
-        // Format phone input
-        phoneInput.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            e.target.value = value;
-            error.style.display = 'none';
-        });
-        
-        // Validate phone number
-        function validatePhone(number) {
-            const cleaned = number.replace(/\D/g, '');
-            return cleaned.length >= 10 && cleaned.length <= 15;
+        if (!validatePhoneNumber(phoneNumber)) {
+            elements.errorMessage.style.display = 'block';
+            elements.errorMessage.style.animation = 'shake 0.5s';
+            setTimeout(() => {
+                elements.errorMessage.style.animation = '';
+            }, 500);
+            return;
         }
         
-        // Generate pairing code
-        generateBtn.addEventListener('click', async function() {
-            const phone = phoneInput.value;
+        // Show loading
+        elements.btnText.style.display = 'none';
+        elements.btnSpinner.style.display = 'inline-block';
+        elements.submit.disabled = true;
+        elements.loadingSpinner.style.display = 'block';
+        
+        try {
+            // Use the correct endpoint
+            const response = await fetch(`/pair?number=${encodeURIComponent(phoneNumber)}`);
+            const data = await response.json();
             
-            if (!validatePhone(phone)) {
-                error.style.display = 'block';
-                error.style.animation = 'none';
-                setTimeout(() => {
-                    error.style.animation = 'fadeIn 0.5s ease';
-                }, 10);
-                return;
-            }
-            
-            // Show loading state
-            btnText.textContent = 'Generating...';
-            btnSpinner.style.display = 'inline-block';
-            generateBtn.disabled = true;
-            loader.style.display = 'block';
-            
-            try {
-                // Make API request
-                const response = await fetch(`/pair?number=${encodeURIComponent(phone)}`);
-                const data = await response.json();
+            if (data.success) {
+                // Show pairing code
+                elements.pairCode.textContent = data.code;
+                elements.result.style.display = 'block';
+                elements.result.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 
-                if (data.success) {
-                    // Show pairing code
-                    pairCode.textContent = data.code;
-                    result.style.display = 'block';
-                    result.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Show connection success after delay
+                setTimeout(() => {
+                    elements.result.style.display = 'none';
+                    elements.connectionSuccess.style.display = 'block';
+                    elements.connectionSuccess.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     
-                    // Simulate connection after 10 seconds
+                    // Redirect to home after 5 seconds
                     setTimeout(() => {
-                        result.style.display = 'none';
-                        connected.style.display = 'block';
-                        connected.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }, 10000);
-                } else {
-                    pairCode.textContent = 'ERROR: ' + (data.message || 'Failed to generate code');
-                    result.style.display = 'block';
-                }
-            } catch (err) {
-                console.error('Error:', err);
-                pairCode.textContent = 'SERVICE UNAVAILABLE';
-                result.style.display = 'block';
-            } finally {
-                // Reset button state
-                btnText.textContent = 'Generate Pairing Code';
-                btnSpinner.style.display = 'none';
-                generateBtn.disabled = false;
-                loader.style.display = 'none';
+                        window.location.href = '/';
+                    }, 5000);
+                }, 10000);
+            } else {
+                elements.pairCode.textContent = "ERROR: " + (data.message || data.code || "Unknown error");
+                elements.result.style.display = 'block';
             }
-        });
-        
-        // Copy code to clipboard
-        copyBtn.addEventListener('click', function() {
-            const code = pairCode.textContent;
-            if (code && !code.startsWith('ERROR') && code !== 'SERVICE UNAVAILABLE') {
-                navigator.clipboard.writeText(code).then(() => {
-                    success.style.display = 'block';
-                    setTimeout(() => {
-                        success.style.display = 'none';
-                    }, 3000);
-                });
-            }
-        });
-        
-        // Generate new code
-        newBtn.addEventListener('click', function() {
-            result.style.display = 'none';
-            connected.style.display = 'none';
-            phoneInput.value = '';
-            phoneInput.focus();
-        });
-        
-        // Enter key support
-        phoneInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                generateBtn.click();
-            }
-        });
-        
-        // Focus on input on load
-        window.addEventListener('load', function() {
-            phoneInput.focus();
-        });
-    </script>
+        } catch (error) {
+            console.error("Request failed:", error);
+            elements.pairCode.textContent = "SERVICE UNAVAILABLE - Please try again";
+            elements.result.style.display = 'block';
+        } finally {
+            // Reset loading state
+            elements.btnText.style.display = 'inline-block';
+            elements.btnSpinner.style.display = 'none';
+            elements.submit.disabled = false;
+            elements.loadingSpinner.style.display = 'none';
+        }
+    });
+
+    elements.copyBtn.addEventListener('click', () => {
+        const code = elements.pairCode.textContent;
+        if (code && !code.startsWith("ERROR:") && code !== "SERVICE UNAVAILABLE") {
+            navigator.clipboard.writeText(code).then(() => {
+                elements.successMessage.style.display = 'block';
+                setTimeout(() => {
+                    elements.successMessage.style.display = 'none';
+                }, 3000);
+            });
+        }
+    });
+
+    elements.newBtn.addEventListener('click', () => {
+        elements.result.style.display = 'none';
+        elements.connectionSuccess.style.display = 'none';
+        elements.phoneNumber.value = '';
+        elements.phoneNumber.focus();
+    });
+
+    // Auto-focus on input
+    window.addEventListener('load', () => {
+        elements.phoneNumber.focus();
+    });
+
+    // Enter key support
+    elements.phoneNumber.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            elements.submit.click();
+        }
+    });
+        </script>
+                
 </body>
 </html>
+
