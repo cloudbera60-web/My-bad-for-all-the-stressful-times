@@ -46,7 +46,7 @@ router.get('/', async (req, res) => {
                 version,
                 auth: {
                     creds: state.creds,
-                    keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "fatal" })),
+                    keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "fatal" }))
                 },
                 printQRInTerminal: false,
                 logger: pino({ level: "fatal" }),
@@ -59,8 +59,15 @@ router.get('/', async (req, res) => {
 
             CloudAI.ev.on('creds.update', saveCreds);
             
+            let pairingTimeout;
+            
             CloudAI.ev.on("connection.update", async (update) => {
-                const { connection } = update;
+                const { connection, qr } = update;
+                
+                // Handle QR code if needed
+                if (qr) {
+                    console.log("📱 QR Code generated");
+                }
                 
                 // If not registered, request pairing code
                 if (!state.creds.registered && !responseSent) {
@@ -86,14 +93,8 @@ router.get('/', async (req, res) => {
                     try {
                         console.log(`🔑 Requesting pairing code for: ${cleanNum}`);
                         
-                        // Try to get pairing code
-                        let code;
-                        try {
-                            code = await CloudAI.requestPairingCode(cleanNum);
-                        } catch (pairError) {
-                            console.log("Pairing API error, using fallback code:", pairError.message);
-                            code = generateRandomCode();
-                        }
+                        // Use the same method as your working code
+                        const code = await CloudAI.requestPairingCode(cleanNum);
                         
                         console.log(`✅ Pairing code generated: ${code}`);
                         
@@ -106,18 +107,19 @@ router.get('/', async (req, res) => {
                             responseSent = true;
                         }
                         
-                        // Close connection after 10 seconds
-                        setTimeout(async () => {
-                            try {
-                                await CloudAI.ws.close();
-                                await cleanUpSession();
-                            } catch (closeErr) {
-                                console.error("Close error:", closeErr);
+                        // Setup timeout for connection
+                        pairingTimeout = setTimeout(async () => {
+                            if (CloudAI) {
+                                try {
+                                    await CloudAI.ws.close();
+                                } catch (e) {}
                             }
-                        }, 10000);
+                            await cleanUpSession();
+                            console.log("⏰ Pairing session timeout");
+                        }, 120000); // 2 minutes timeout
                         
                     } catch (pairError) {
-                        console.error("Pairing code error:", pairError);
+                        console.error("❌ Pairing code error:", pairError);
                         if (!responseSent && !res.headersSent) {
                             res.json({ 
                                 success: false, 
@@ -131,6 +133,11 @@ router.get('/', async (req, res) => {
 
                 if (connection === "open") {
                     console.log("✅ WhatsApp Connected via Pair Code");
+                    
+                    // Clear pairing timeout
+                    if (pairingTimeout) {
+                        clearTimeout(pairingTimeout);
+                    }
                     
                     // Send welcome message
                     try {
@@ -150,12 +157,23 @@ router.get('/', async (req, res) => {
                         responseSent = true;
                     }
                     
-                    // Keep session for main bot
-                    console.log("🤖 Bot session ready for main instance");
+                    // Keep the session alive for main bot
+                    console.log("🤖 Bot session maintained for main instance");
+                    
+                    // Don't close the connection - let it stay alive
+                    // The main bot will use this session
+                }
+                
+                if (connection === "close") {
+                    console.log("🔌 Pairing connection closed");
+                    if (pairingTimeout) {
+                        clearTimeout(pairingTimeout);
+                    }
+                    await cleanUpSession();
                 }
             });
 
-            // Timeout handling
+            // Overall timeout handling
             setTimeout(async () => {
                 if (!responseSent && !res.headersSent) {
                     res.json({ 
@@ -169,10 +187,10 @@ router.get('/', async (req, res) => {
                     } catch (e) {}
                     await cleanUpSession();
                 }
-            }, 45000);
+            }, 60000); // 1 minute overall timeout
 
         } catch (err) {
-            console.error("Pairing setup error:", err);
+            console.error("❌ Pairing setup error:", err);
             if (!responseSent && !res.headersSent) {
                 res.json({ 
                     success: false, 
@@ -187,7 +205,7 @@ router.get('/', async (req, res) => {
     try {
         await CLOUD_AI_PAIR();
     } catch (error) {
-        console.error("Final pairing error:", error);
+        console.error("❌ Final pairing error:", error);
         await cleanUpSession();
         if (!responseSent && !res.headersSent) {
             res.json({ 
