@@ -130,4 +130,72 @@ router.get('/', async (req, res) => {
                 }
 
                 if (connection === "open") {
-                    console.log
+                    console.log("✅ WhatsApp Connected via Pair Code");
+                    
+                    // Send welcome message
+                    try {
+                        await CloudAI.sendMessage(CloudAI.user.id, {
+                            text: `*🤖 CLOUD AI Activated!*\n\nYour WhatsApp is now connected to Cloud AI bot.\n\nUse *.* to access commands.\n\nType *.help* to see available commands.\n\nEnjoy! 🚀`
+                        });
+                    } catch (msgError) {
+                        console.error("Welcome message error:", msgError);
+                    }
+                    
+                    if (!responseSent && !res.headersSent) {
+                        res.json({
+                            success: true,
+                            message: "✅ Cloud AI bot activated! You can now use commands.",
+                            status: "connected"
+                        });
+                        responseSent = true;
+                    }
+                    
+                    // Keep session for main bot
+                    console.log("🤖 Bot session ready for main instance");
+                }
+            });
+
+            // Timeout handling
+            setTimeout(async () => {
+                if (!responseSent && !res.headersSent) {
+                    res.json({ 
+                        success: false, 
+                        message: "Request timeout. Please try again." 
+                    });
+                    responseSent = true;
+                    
+                    try {
+                        await CloudAI.ws.close();
+                    } catch (e) {}
+                    await cleanUpSession();
+                }
+            }, 45000);
+
+        } catch (err) {
+            console.error("Pairing setup error:", err);
+            if (!responseSent && !res.headersSent) {
+                res.json({ 
+                    success: false, 
+                    message: "Setup failed. Server error." 
+                });
+                responseSent = true;
+            }
+            await cleanUpSession();
+        }
+    }
+
+    try {
+        await CLOUD_AI_PAIR();
+    } catch (error) {
+        console.error("Final pairing error:", error);
+        await cleanUpSession();
+        if (!responseSent && !res.headersSent) {
+            res.json({ 
+                success: false, 
+                message: "Service error occurred. Please try again." 
+            });
+        }
+    }
+});
+
+module.exports = router;
