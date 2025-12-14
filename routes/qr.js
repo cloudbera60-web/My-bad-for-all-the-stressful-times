@@ -1,47 +1,34 @@
-const { 
-    giftedId,
-    removeFile
-} = require('../gift');
+const { giftedId, removeFile } = require('../gift');
 const QRCode = require('qrcode');
 const express = require('express');
-const zlib = require('zlib');
 const path = require('path');
-const fs = require('fs');
 let router = express.Router();
 const pino = require("pino");
-const { sendButtons } = require('gifted-btns');
+
 const {
     default: giftedConnect,
     useMultiFileAuthState,
     Browsers,
     delay,
-    downloadContentFromMessage, 
-    generateWAMessageFromContent, 
-    normalizeMessageContent,
     fetchLatestBaileysVersion
 } = require("@whiskeysockets/baileys");
 
 const sessionDir = path.join(__dirname, "session");
 
-
 router.get('/', async (req, res) => {
     const id = giftedId();
     let responseSent = false;
-    let sessionCleanedUp = false;
 
     async function cleanUpSession() {
-        if (!sessionCleanedUp) {
-            await removeFile(path.join(sessionDir, id));
-            sessionCleanedUp = true;
-        }
+        await removeFile(path.join(sessionDir, id));
     }
 
-    async function GIFTED_QR_CODE() {
+    async function CLOUD_AI_QR() {
         const { version } = await fetchLatestBaileysVersion();
-        console.log(version);
         const { state, saveCreds } = await useMultiFileAuthState(path.join(sessionDir, id));
+        
         try {
-            let Gifted = giftedConnect({
+            let CloudAI = giftedConnect({
                 version,
                 auth: state,
                 printQRInTerminal: false,
@@ -51,9 +38,10 @@ router.get('/', async (req, res) => {
                 keepAliveIntervalMs: 30000
             });
 
-            Gifted.ev.on('creds.update', saveCreds);
-            Gifted.ev.on("connection.update", async (s) => {
-                const { connection, lastDisconnect, qr } = s;
+            CloudAI.ev.on('creds.update', saveCreds);
+            
+            CloudAI.ev.on("connection.update", async (update) => {
+                const { connection, qr } = update;
                 
                 if (qr && !responseSent) {
                     const qrImage = await QRCode.toDataURL(qr);
@@ -62,128 +50,62 @@ router.get('/', async (req, res) => {
                             <!DOCTYPE html>
                             <html>
                             <head>
-                                <title>GIFTED-MD | QR CODE</title>
-                                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+                                <title>CLOUD AI | QR CODE</title>
+                                <meta name="viewport" content="width=device-width, initial-scale=1.0">
                                 <style>
                                     body {
-                                        display: flex;
-                                        justify-content: center;
-                                        align-items: center;
-                                        min-height: 100vh;
-                                        margin: 0;
-                                        background-color: #000;
+                                        background: #0a0a0a;
+                                        color: white;
                                         font-family: Arial, sans-serif;
-                                        color: #fff;
                                         text-align: center;
                                         padding: 20px;
-                                        box-sizing: border-box;
                                     }
                                     .container {
-                                        width: 100%;
-                                        max-width: 600px;
-                                    }
-                                    .qr-container {
-                                        position: relative;
-                                        margin: 20px auto;
-                                        width: 300px;
-                                        height: 300px;
-                                        display: flex;
-                                        justify-content: center;
-                                        align-items: center;
-                                    }
-                                    .qr-code {
-                                        width: 300px;
-                                        height: 300px;
-                                        padding: 10px;
-                                        background: white;
+                                        max-width: 400px;
+                                        margin: 50px auto;
+                                        padding: 30px;
+                                        background: rgba(255,255,255,0.05);
                                         border-radius: 20px;
-                                        box-shadow: 0 0 0 10px rgba(255,255,255,0.1),
-                                                    0 0 0 20px rgba(255,255,255,0.05),
-                                                    0 0 30px rgba(255,255,255,0.2);
-                                    }
-                                    .qr-code img {
-                                        width: 100%;
-                                        height: 100%;
+                                        backdrop-filter: blur(10px);
                                     }
                                     h1 {
-                                        color: #fff;
-                                        margin: 0 0 15px 0;
-                                        font-size: 28px;
-                                        font-weight: 800;
-                                        text-shadow: 0 0 10px rgba(255,255,255,0.3);
+                                        color: #7b2cbf;
+                                        margin-bottom: 20px;
                                     }
-                                    p {
-                                        color: #ccc;
-                                        margin: 20px 0;
-                                        font-size: 16px;
-                                    }
-                                    .back-btn {
+                                    .qr-code {
+                                        background: white;
+                                        padding: 20px;
+                                        border-radius: 10px;
                                         display: inline-block;
-                                        padding: 12px 25px;
-                                        margin-top: 15px;
-                                        background: linear-gradient(135deg, #6e48aa 0%, #9d50bb 100%);
-                                        color: white;
-                                        text-decoration: none;
-                                        border-radius: 30px;
-                                        font-weight: bold;
-                                        border: none;
-                                        cursor: pointer;
-                                        transition: all 0.3s ease;
-                                        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                                        margin: 20px 0;
                                     }
-                                    .back-btn:hover {
-                                        transform: translateY(-2px);
-                                        box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-                                    }
-                                    .pulse {
-                                        animation: pulse 2s infinite;
-                                    }
-                                    @keyframes pulse {
-                                        0% {
-                                            box-shadow: 0 0 0 0 rgba(255,255,255,0.4);
-                                        }
-                                        70% {
-                                            box-shadow: 0 0 0 15px rgba(255,255,255,0);
-                                        }
-                                        100% {
-                                            box-shadow: 0 0 0 0 rgba(255,255,255,0);
-                                        }
-                                    }
-                                    @media (max-width: 480px) {
-                                        .qr-container {
-                                            width: 260px;
-                                            height: 260px;
-                                        }
-                                        .qr-code {
-                                            width: 220px;
-                                            height: 220px;
-                                        }
-                                        h1 {
-                                            font-size: 24px;
-                                        }
+                                    .success {
+                                        color: #4CAF50;
+                                        display: none;
+                                        padding: 20px;
+                                        background: rgba(76,175,80,0.1);
+                                        border-radius: 10px;
+                                        margin: 20px 0;
                                     }
                                 </style>
                             </head>
                             <body>
                                 <div class="container">
-                                    <h1>GIFTED QR CODE</h1>
-                                    <div class="qr-container">
-                                        <div class="qr-code pulse">
-                                            <img src="${qrImage}" alt="QR Code"/>
-                                        </div>
+                                    <h1>🤖 CLOUD AI</h1>
+                                    <p>Scan QR Code with WhatsApp</p>
+                                    <div class="qr-code">
+                                        <img src="${qrImage}" alt="QR Code" width="250"/>
                                     </div>
-                                    <p>Scan this QR code with your phone to connect</p>
-                                    <a href="./" class="back-btn">Back</a>
+                                    <div id="success" class="success">
+                                        ✅ Connected! Bot is now active.
+                                    </div>
+                                    <p>Scan then wait for connection...</p>
                                 </div>
                                 <script>
-                                    document.querySelector('.back-btn').addEventListener('mousedown', function(e) {
-                                        this.style.transform = 'translateY(1px)';
-                                        this.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
-                                    });
-                                    document.querySelector('.back-btn').addEventListener('mouseup', function(e) {
-                                        this.style.transform = 'translateY(-2px)';
-                                        this.style.boxShadow = '0 6px 20px rgba(0,0,0,0.3)';
-                                    });
+                                    // Auto-refresh QR if needed
+                                    setTimeout(() => {
+                                        location.reload();
+                                    }, 30000);
                                 </script>
                             </body>
                             </html>
@@ -193,87 +115,65 @@ router.get('/', async (req, res) => {
                 }
 
                 if (connection === "open") {
-                    await Gifted.groupAcceptInvite("GiD4BYjebncLvhr0J2SHAg");
- 
-                    await delay(10000);
-
-                    let sessionData = null;
-                    let attempts = 0;
-                    const maxAttempts = 10;
+                    console.log("✅ Cloud AI Connected via QR");
                     
-                    while (attempts < maxAttempts && !sessionData) {
-                        try {
-                            const credsPath = path.join(sessionDir, id, "creds.json");
-                            if (fs.existsSync(credsPath)) {
-                                const data = fs.readFileSync(credsPath);
-                                if (data && data.length > 100) {
-                                    sessionData = data;
-                                    break;
-                                }
-                            }
-                            await delay(2000);
-                            attempts++;
-                        } catch (readError) {
-                            console.error("Read error:", readError);
-                            await delay(2000);
-                            attempts++;
-                        }
-                    }
+                    // Send welcome message
+                    await CloudAI.sendMessage(CloudAI.user.id, {
+                        text: `*🤖 Cloud AI Activated!*\n\nYour WhatsApp is now connected to Cloud AI bot.\n\nUse *.* to access commands.\n\nType *.help* to see available commands.`
+                    });
 
-                    if (!sessionData) {
-                        await cleanUpSession();
-                        return;
-                    }
-
-                    try {
-                        let compressedData = zlib.gzipSync(sessionData);
-                        let b64data = compressedData.toString('base64');
-                        const Sess = await sendButtons(Gifted, Gifted.user.id, {
-            title: '',
-            text: 'Gifted~' + b64data,
-            footer: `> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ ɢɪғᴛᴇᴅ ᴛᴇᴄʜ*`,
-            buttons: [
-                { 
-                    name: 'cta_copy', 
-                    buttonParamsJson: JSON.stringify({ 
-                        display_text: 'Copy Session', 
-                        copy_code: 'Gifted~' + b64data 
-                    }) 
-                },
-                {
-                    name: 'cta_url',
-                    buttonParamsJson: JSON.stringify({
-                        display_text: 'Visit Bot Repo',
-                        url: 'https://github.com/mauricegift/gifted-md'
-                    })
-                },
-                {
-                    name: 'cta_url',
-                    buttonParamsJson: JSON.stringify({
-                        display_text: 'Join WaChannel',
-                        url: 'https://whatsapp.com/channel/0029Vb3hlgX5kg7G0nFggl0Y'
-                    })
-                }
-            ]
-        });
-
-                        await delay(2000);
-                        await Gifted.ws.close();
-                    } catch (sendError) {
-                        console.error("Error sending session:", sendError);
-                    } finally {
-                        await cleanUpSession();
+                    // Send success response to browser
+                    if (!res.headersSent) {
+                        res.send(`
+                            <!DOCTYPE html>
+                            <html>
+                            <head>
+                                <title>CLOUD AI | Connected</title>
+                                <style>
+                                    body {
+                                        background: #0a0a0a;
+                                        color: white;
+                                        font-family: Arial, sans-serif;
+                                        text-align: center;
+                                        padding: 50px;
+                                    }
+                                    .success {
+                                        color: #4CAF50;
+                                        font-size: 24px;
+                                        margin: 20px 0;
+                                    }
+                                    .info {
+                                        background: rgba(123,44,191,0.1);
+                                        padding: 20px;
+                                        border-radius: 10px;
+                                        margin: 30px auto;
+                                        max-width: 400px;
+                                    }
+                                </style>
+                            </head>
+                            <body>
+                                <div class="success">✅ CONNECTED SUCCESSFULLY!</div>
+                                <div class="info">
+                                    <h3>🤖 Cloud AI is now active</h3>
+                                    <p>Your WhatsApp is connected to Cloud AI bot.</p>
+                                    <p>Use <strong>.</strong> prefix for commands</p>
+                                    <p>Example: <code>.ping</code></p>
+                                </div>
+                                <a href="/" style="color: #7b2cbf;">← Back to Home</a>
+                            </body>
+                            </html>
+                        `);
                     }
                     
-                } else if (connection === "close" && lastDisconnect && lastDisconnect.error && lastDisconnect.error.output.statusCode != 401) {
-                    await delay(10000);
-                    GIFTED_QR_CODE();
+                    // Keep bot running - no cleanup
+                    // The bot will continue running
                 }
             });
+
         } catch (err) {
-            console.error("Main error:", err);
+            console.error("QR error:", err);
             if (!responseSent) {
-                res.status(500).json({ code: "QR Service is Currently Unavailable" });
+                res.status(500).json({ error: "QR generation failed" });
                 responseSent = true;
             }
             await cleanUpSession();
@@ -281,12 +181,12 @@ router.get('/', async (req, res) => {
     }
 
     try {
-        await GIFTED_QR_CODE();
-    } catch (finalError) {
-        console.error("Final error:", finalError);
+        await CLOUD_AI_QR();
+    } catch (error) {
+        console.error("Final error:", error);
         await cleanUpSession();
         if (!responseSent) {
-            res.status(500).json({ code: "Service Error" });
+            res.status(500).json({ error: "Service error" });
         }
     }
 });
