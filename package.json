@@ -1,9 +1,9 @@
 {
   "name": "gifted-session",
-  "main": "./index.js",
+  "main": "main.js",
   "type": "commonjs",
   "scripts": {
-    "start": "pm2 start index.js --deep-monitoring --attach --name giftedsess",
+    "start": "pm2 start main.js --deep-monitoring --attach --name giftedsess",
     "stop": "pm2 stop giftedsess",
     "restart": "pm2 restart giftedsess"
   },
