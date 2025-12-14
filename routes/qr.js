@@ -2,7 +2,7 @@ const { giftedId, removeFile } = require('../gift');
 const QRCode = require('qrcode');
 const express = require('express');
 const path = require('path');
-let router = express.Router();
+const router = express.Router();
 const pino = require("pino");
 
 const {
@@ -13,21 +13,25 @@ const {
     fetchLatestBaileysVersion
 } = require("@whiskeysockets/baileys");
 
-const sessionDir = path.join(__dirname, "session");
+const sessionDir = path.join(__dirname, "..", "session");
 
 router.get('/', async (req, res) => {
     const id = giftedId();
     let responseSent = false;
 
     async function cleanUpSession() {
-        await removeFile(path.join(sessionDir, id));
+        try {
+            await removeFile(path.join(sessionDir, id));
+        } catch (error) {
+            console.error("QR cleanup error:", error);
+        }
     }
 
     async function CLOUD_AI_QR() {
-        const { version } = await fetchLatestBaileysVersion();
-        const { state, saveCreds } = await useMultiFileAuthState(path.join(sessionDir, id));
-        
         try {
+            const { version } = await fetchLatestBaileysVersion();
+            const { state, saveCreds } = await useMultiFileAuthState(path.join(sessionDir, id));
+            
             let CloudAI = giftedConnect({
                 version,
                 auth: state,
@@ -44,151 +48,119 @@ router.get('/', async (req, res) => {
                 const { connection, qr } = update;
                 
                 if (qr && !responseSent) {
-                    const qrImage = await QRCode.toDataURL(qr);
-                    if (!res.headersSent) {
-                        res.send(`
-                            <!DOCTYPE html>
-                            <html>
-                            <head>
-                                <title>CLOUD AI | QR CODE</title>
-                                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                <style>
-                                    body {
-                                        background: #0a0a0a;
-                                        color: white;
-                                        font-family: Arial, sans-serif;
-                                        text-align: center;
-                                        padding: 20px;
-                                    }
-                                    .container {
-                                        max-width: 400px;
-                                        margin: 50px auto;
-                                        padding: 30px;
-                                        background: rgba(255,255,255,0.05);
-                                        border-radius: 20px;
-                                        backdrop-filter: blur(10px);
-                                    }
-                                    h1 {
-                                        color: #7b2cbf;
-                                        margin-bottom: 20px;
-                                    }
-                                    .qr-code {
-                                        background: white;
-                                        padding: 20px;
-                                        border-radius: 10px;
-                                        display: inline-block;
-                                        margin: 20px 0;
-                                    }
-                                    .success {
-                                        color: #4CAF50;
-                                        display: none;
-                                        padding: 20px;
-                                        background: rgba(76,175,80,0.1);
-                                        border-radius: 10px;
-                                        margin: 20px 0;
-                                    }
-                                </style>
-                            </head>
-                            <body>
-                                <div class="container">
-                                    <h1>🤖 CLOUD AI</h1>
-                                    <p>Scan QR Code with WhatsApp</p>
-                                    <div class="qr-code">
-                                        <img src="${qrImage}" alt="QR Code" width="250"/>
-                                    </div>
-                                    <div id="success" class="success">
-                                        ✅ Connected! Bot is now active.
-                                    </div>
-                                    <p>Scan then wait for connection...</p>
-                                </div>
-                                <script>
-                                    // Auto-refresh QR if needed
-                                    setTimeout(() => {
-                                        location.reload();
-                                    }, 30000);
-                                </script>
-                            </body>
-                            </html>
-                        `);
-                        responseSent = true;
-                    }
-                }
-
-                if (connection === "open") {
-                    console.log("✅ Cloud AI Connected via QR");
-                    
-                    // Send welcome message
-                    await CloudAI.sendMessage(CloudAI.user.id, {
-                        text: `*🤖 Cloud AI Activated!*\n\nYour WhatsApp is now connected to Cloud AI bot.\n\nUse *.* to access commands.\n\nType *.help* to see available commands.`
-                    });
-
-                    // Send success response to browser
-                    if (!res.headersSent) {
-                        res.send(`
-                            <!DOCTYPE html>
-                            <html>
-                            <head>
-                                <title>CLOUD AI | Connected</title>
-                                <style>
-                                    body {
-                                        background: #0a0a0a;
-                                        color: white;
-                                        font-family: Arial, sans-serif;
-                                        text-align: center;
-                                        padding: 50px;
-                                    }
-                                    .success {
-                                        color: #4CAF50;
-                                        font-size: 24px;
-                                        margin: 20px 0;
-                                    }
-                                    .info {
-                                        background: rgba(123,44,191,0.1);
-                                        padding: 20px;
-                                        border-radius: 10px;
-                                        margin: 30px auto;
-                                        max-width: 400px;
-                                    }
-                                </style>
-                            </head>
-                            <body>
-                                <div class="success">✅ CONNECTED SUCCESSFULLY!</div>
-                                <div class="info">
-                                    <h3>🤖 Cloud AI is now active</h3>
-                                    <p>Your WhatsApp is connected to Cloud AI bot.</p>
-                                    <p>Use <strong>.</strong> prefix for commands</p>
-                                    <p>Example: <code>.ping</code></p>
-                                </div>
-                                <a href="/" style="color: #7b2cbf;">← Back to Home</a>
-                            </body>
-                            </html>
-                        `);
-                    }
-                    
-                    // Keep bot running - no cleanup
-                    // The bot will continue running
-                }
-            });
-
-        } catch (err) {
-            console.error("QR error:", err);
-            if (!responseSent) {
-                res.status(500).json({ error: "QR generation failed" });
-                responseSent = true;
-            }
-            await cleanUpSession();
-        }
-    }
-
-    try {
-        await CLOUD_AI_QR();
-    } catch (error) {
-        console.error("Final error:", error);
-        await cleanUpSession();
-        if (!responseSent) {
-            res.status(500).json({ error: "Service error" });
-        }
-    }
-});
-
-module.exports = router;
+                    try {
+                        const qrImage = await QRCode.toDataURL(qr);
+                        if (!res.headersSent) {
+                            res.send(`
+                                <!DOCTYPE html>
+                                <html>
+                                <head>
+                                    <title>CLOUD AI | QR CODE</title>
+                                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                                    <style>
+                                        * {
+                                            margin: 0;
+                                            padding: 0;
+                                            box-sizing: border-box;
+                                            font-family: 'Segoe UI', Arial, sans-serif;
+                                        }
+                                        
+                                        body {
+                                            background: linear-gradient(135deg, #0d1b2a 0%, #1b263b 100%);
+                                            color: #e0e1dd;
+                                            min-height: 100vh;
+                                            display: flex;
+                                            justify-content: center;
+                                            align-items: center;
+                                            padding: 20px;
+                                        }
+                                        
+                                        .container {
+                                            background: rgba(255, 255, 255, 0.05);
+                                            backdrop-filter: blur(10px);
+                                            border-radius: 20px;
+                                            padding: 40px;
+                                            text-align: center;
+                                            max-width: 500px;
+                                            width: 100%;
+                                            border: 1px solid rgba(58, 134, 255, 0.2);
+                                            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                                            animation: fadeIn 0.5s ease;
+                                        }
+                                        
+                                        @keyframes fadeIn {
+                                            from { opacity: 0; transform: translateY(20px); }
+                                            to { opacity: 1; transform: translateY(0); }
+                                        }
+                                        
+                                        h1 {
+                                            background: linear-gradient(135deg, #3a86ff, #06d6a0);
+                                            -webkit-background-clip: text;
+                                            background-clip: text;
+                                            color: transparent;
+                                            margin-bottom: 20px;
+                                            font-size: 2.5rem;
+                                            font-weight: 800;
+                                        }
+                                        
+                                        .qr-container {
+                                            background: white;
+                                            padding: 20px;
+                                            border-radius: 15px;
+                                            display: inline-block;
+                                            margin: 25px 0;
+                                            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+                                            animation: pulse 2s infinite;
+                                        }
+                                        
+                                        @keyframes pulse {
+                                            0% { box-shadow: 0 5px 20px rgba(58, 134, 255, 0.4); }
+                                            50% { box-shadow: 0 5px 30px rgba(58, 134, 255, 0.6); }
+                                            100% { box-shadow: 0 5px 20px rgba(58, 134, 255, 0.4); }
+                                        }
+                                        
+                                        .qr-container img {
+                                            width: 250px;
+                                            height: 250px;
+                                            border-radius: 10px;
+                                        }
+                                        
+                                        p {
+                                            color: #8d99ae;
+                                            margin: 15px 0;
+                                            line-height: 1.6;
+                                            font-size: 1.1rem;
+                                        }
+                                        
+                                        .instructions {
+                                            background: rgba(58, 134, 255, 0.1);
+                                            padding: 20px;
+                                            border-radius: 10px;
+                                            margin: 25px 0;
+                                            text-align: left;
+                                        }
+                                        
+                                        .instructions h3 {
+                                            color: #3a86ff;
+                                            margin-bottom: 10px;
+                                        }
+                                        
+                                        .instructions ol {
+                                            padding-left: 20px;
+                                            color: #e0e1dd;
+                                        }
+                                        
+                                        .instructions li {
+                                            margin-bottom: 8px;
+                                        }
+                                        
+                                        .back-btn {
+                                            display: inline-block;
+                                            background: linear-gradient(135deg, #3a86ff, #4361ee);
+                                            color: white;
+                                            padding: 12px 30px;
+                                            border-radius: 25px;
+                                            text-decoration: none;
+                                            font-weight: 600;
+                                            margin-top: 20px;
+                                            transition: all 0
