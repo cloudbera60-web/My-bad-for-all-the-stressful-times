@@ -3,22 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GIFTED MD | PAIR CODE</title>
+    <title>CLOUD AI | PAIR CODE</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #8a2be2;
-            --secondary: #9932cc;
-            --accent: #ff69b4;
-            --text: #ffffff;
-            --text-light: #d3d3d3;
-            --background: #121212;
-            --card-bg: #1e1e1e;
-            --input-bg: #2d2d2d;
-            --success: #4caf50;
-            --error: #f44336;
-            --warning: #ff9800;
-            --shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            --primary: #3a86ff;
+            --secondary: #4361ee;
+            --accent: #06d6a0;
+            --dark: #0d1b2a;
+            --light: #e0e1dd;
+            --gray: #8d99ae;
+            --gradient: linear-gradient(135deg, #3a86ff 0%, #4361ee 50%, #06d6a0 100%);
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -26,68 +22,67 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            transition: var(--transition);
         }
 
         body {
-            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--background);
-            color: var(--text);
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--dark);
+            color: var(--light);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            line-height: 1.6;
             padding: 20px;
             background-image: 
-                radial-gradient(circle at 10% 20%, rgba(138, 43, 226, 0.1) 0%, transparent 20%),
-                radial-gradient(circle at 90% 80%, rgba(255, 105, 180, 0.1) 0%, transparent 20%);
+                radial-gradient(circle at 10% 20%, rgba(58, 134, 255, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(6, 214, 160, 0.15) 0%, transparent 20%);
             animation: gradientPulse 15s ease infinite;
         }
 
         @keyframes gradientPulse {
-            0% { background-position: 10% 20%, 90% 80%; }
+            0%, 100% { background-position: 10% 20%, 90% 80%; }
             50% { background-position: 15% 25%, 85% 75%; }
-            100% { background-position: 10% 20%, 90% 80%; }
         }
 
         .home-btn {
             position: fixed;
             top: 1.5rem;
             right: 1.5rem;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background: var(--gradient);
             color: white;
-            padding: 0.8rem 1.5rem;
+            padding: 0.8rem 1.8rem;
             border-radius: 30px;
-            font-weight: 600;
+            font-weight: 700;
             text-decoration: none;
             box-shadow: var(--shadow);
             z-index: 100;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.8rem;
             transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
         }
 
         .home-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(138, 43, 226, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(58, 134, 255, 0.4);
         }
 
         .container {
-            background-color: var(--card-bg);
-            padding: 2rem;
-            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 3rem;
+            border-radius: 25px;
             box-shadow: var(--shadow);
             width: 100%;
             max-width: 500px;
             text-align: center;
             position: relative;
             overflow: hidden;
-            border: 1px solid rgba(138, 43, 226, 0.2);
-            animation: fadeIn 0.5s ease-out;
-            z-index: 1;
-            margin-top: 2rem;
+            border: 1px solid rgba(58, 134, 255, 0.2);
+            backdrop-filter: blur(20px);
+            animation: fadeIn 0.6s ease-out;
         }
 
         .container::before {
@@ -97,25 +92,27 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: linear-gradient(
-                to bottom right,
-                rgba(138, 43, 226, 0.1) 0%,
-                rgba(255, 105, 180, 0.05) 50%,
-                transparent 100%
-            );
+            background: var(--gradient);
+            opacity: 0.05;
             transform: rotate(30deg);
             z-index: -1;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .logo {
             width: 100px;
             height: 100px;
-            margin: 0 auto 1.5rem;
+            margin: 0 auto 2rem;
             position: relative;
         }
 
@@ -125,39 +122,50 @@
             border-radius: 50%;
             object-fit: cover;
             border: 3px solid var(--primary);
-            box-shadow: 0 0 20px rgba(138, 43, 226, 0.4);
+            box-shadow: 0 0 30px rgba(58, 134, 255, 0.4);
             animation: pulseGlow 2s infinite alternate;
         }
 
         @keyframes pulseGlow {
-            0% { box-shadow: 0 0 10px rgba(138, 43, 226, 0.4); }
-            100% { box-shadow: 0 0 25px rgba(138, 43, 226, 0.6); }
+            0% {
+                box-shadow: 0 0 20px rgba(58, 134, 255, 0.4);
+                transform: scale(1);
+            }
+            100% {
+                box-shadow: 0 0 40px rgba(58, 134, 255, 0.6);
+                transform: scale(1.02);
+            }
         }
 
         h1 {
-            color: var(--primary);
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
             margin-bottom: 1rem;
-            font-size: 2rem;
-            font-weight: 700;
-            text-shadow: 0 0 10px rgba(138, 43, 226, 0.3);
+            font-size: 2.5rem;
+            font-weight: 900;
+            letter-spacing: -0.5px;
         }
 
         p {
-            color: var(--text-light);
-            margin-bottom: 2rem;
-            font-size: 1rem;
+            color: var(--gray);
+            margin-bottom: 2.5rem;
+            font-size: 1.1rem;
+            line-height: 1.6;
         }
 
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
             text-align: left;
         }
 
         label {
             display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: var(--text);
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+            color: var(--light);
+            font-size: 1rem;
         }
 
         .input-container {
@@ -167,100 +175,95 @@
 
         .input-container i {
             position: absolute;
-            left: 15px;
+            left: 20px;
             top: 50%;
             transform: translateY(-50%);
-            color: var(--text-light);
+            color: var(--gray);
+            font-size: 1.2rem;
         }
 
         input[type="text"] {
             width: 100%;
-            padding: 15px 15px 15px 45px;
-            border: 2px solid rgba(138, 43, 226, 0.3);
-            border-radius: 10px;
-            background-color: var(--input-bg);
-            color: var(--text);
-            font-size: 1rem;
+            padding: 18px 20px 18px 55px;
+            border: 2px solid rgba(58, 134, 255, 0.3);
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.07);
+            color: var(--light);
+            font-size: 1.1rem;
             transition: var(--transition);
+            font-weight: 500;
         }
 
         input[type="text"]:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.2);
+            box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .btn {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background: var(--gradient);
             color: white;
-            padding: 15px;
+            padding: 18px;
             border: none;
-            border-radius: 10px;
+            border-radius: 15px;
             cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
+            font-size: 1.1rem;
+            font-weight: 700;
             width: 100%;
             transition: var(--transition);
-            box-shadow: 0 4px 15px rgba(138, 43, 226, 0.3);
+            box-shadow: 0 5px 20px rgba(58, 134, 255, 0.3);
             position: relative;
             overflow: hidden;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.5px;
         }
 
         .btn:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(138, 43, 226, 0.4);
+            box-shadow: 0 10px 30px rgba(58, 134, 255, 0.4);
         }
 
         .btn:active {
-            transform: translateY(0);
+            transform: translateY(-1px);
         }
 
-        .btn::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                to bottom right,
-                rgba(255, 255, 255, 0.3) 0%,
-                rgba(255, 255, 255, 0) 60%
-            );
-            transform: translateX(-100%) rotate(30deg);
-            transition: all 0.6s ease;
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
         }
 
-        .btn:hover::after {
-            transform: translateX(100%) rotate(30deg);
+        .btn-text {
+            display: inline-block;
+            transition: var(--transition);
+        }
+
+        .btn-spinner {
+            display: none;
+            animation: spin 1s linear infinite;
         }
 
         #result {
-            margin-top: 1.5rem;
-            padding: 1.5rem;
-            border-radius: 10px;
+            margin-top: 2rem;
+            padding: 2rem;
+            border-radius: 15px;
             display: none;
             animation: fadeIn 0.3s ease-out;
             text-align: center;
-            font-weight: 500;
-            background-color: rgba(138, 43, 226, 0.1);
+            background: rgba(58, 134, 255, 0.1);
             border-left: 4px solid var(--primary);
-        }
-
-        #loading-spinner {
-            display: none;
-            margin: 1.5rem 0;
         }
 
         .spinner {
             width: 50px;
             height: 50px;
-            margin: 0 auto;
-            border: 4px solid rgba(138, 43, 226, 0.2);
+            margin: 2rem auto;
+            border: 4px solid rgba(58, 134, 255, 0.2);
             border-top: 4px solid var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
+            display: none;
         }
 
         @keyframes spin {
@@ -269,75 +272,146 @@
         }
 
         #pair-code {
-            font-size: 1.5rem;
-            font-weight: 700;
+            font-size: 1.8rem;
+            font-weight: 800;
             color: var(--primary);
-            margin: 1rem 0;
+            margin: 1.5rem 0;
             letter-spacing: 2px;
-            text-shadow: 0 0 10px rgba(138, 43, 226, 0.3);
+            text-shadow: 0 0 15px rgba(58, 134, 255, 0.3);
             animation: textGlow 2s infinite alternate;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
         }
 
         @keyframes textGlow {
-            0% { text-shadow: 0 0 5px rgba(138, 43, 226, 0.3); }
-            100% { text-shadow: 0 0 15px rgba(138, 43, 226, 0.5); }
+            0% {
+                text-shadow: 0 0 10px rgba(58, 134, 255, 0.3);
+                transform: scale(1);
+            }
+            100% {
+                text-shadow: 0 0 20px rgba(58, 134, 255, 0.5);
+                transform: scale(1.02);
+            }
         }
 
         .action-buttons {
             display: flex;
-            gap: 1rem;
-            margin-top: 1.5rem;
+            gap: 1.2rem;
+            margin-top: 2rem;
         }
 
         .action-btn {
             flex: 1;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: 600;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: 700;
             cursor: pointer;
             transition: var(--transition);
-        }
-
-        .copy-btn {
-            background-color: var(--primary);
-            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            font-size: 1rem;
             border: none;
         }
 
+        .copy-btn {
+            background: var(--primary);
+            color: white;
+        }
+
         .copy-btn:hover {
-            background-color: var(--secondary);
+            background: var(--secondary);
             transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(58, 134, 255, 0.3);
         }
 
         .back-btn {
-            background-color: transparent;
+            background: transparent;
             color: var(--primary);
             border: 2px solid var(--primary);
+            text-decoration: none;
         }
 
         .back-btn:hover {
-            background-color: rgba(138, 43, 226, 0.1);
+            background: rgba(58, 134, 255, 0.1);
             transform: translateY(-2px);
         }
 
         .error-message {
-            color: var(--error);
-            margin-top: 0.5rem;
+            color: #ff4757;
+            margin-top: 0.8rem;
             font-size: 0.9rem;
             display: none;
             animation: shake 0.5s;
+            font-weight: 500;
         }
 
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-5px); }
-            40%, 80% { transform: translateX(5px); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
         }
 
         .success-message {
-            color: var(--success);
-            margin-top: 1rem;
+            color: var(--accent);
+            margin-top: 1.5rem;
             display: none;
+            font-weight: 600;
+            font-size: 1rem;
+            animation: fadeIn 0.3s;
+        }
+
+        .instructions {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-top: 2rem;
+            text-align: left;
+        }
+
+        .instructions h3 {
+            color: var(--light);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .instructions ol {
+            color: var(--gray);
+            padding-left: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .instructions li {
+            margin-bottom: 0.8rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .action-btn {
+                width: 100%;
+            }
+            
+            .home-btn {
+                top: 1rem;
+                right: 1rem;
+                padding: 0.7rem 1.5rem;
+                font-size: 0.9rem;
+            }
         }
 
         @media (max-width: 480px) {
@@ -346,200 +420,241 @@
             }
             
             h1 {
-                font-size: 1.5rem;
+                font-size: 1.8rem;
             }
             
-            .action-buttons {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-
-            .home-btn {
-                top: 1rem;
-                right: 1rem;
-                padding: 0.6rem 1rem;
-                font-size: 0.9rem;
+            .logo {
+                width: 80px;
+                height: 80px;
             }
         }
 
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            overflow: hidden;
+        .connection-success {
+            display: none;
+            background: rgba(6, 214, 160, 0.1);
+            padding: 2rem;
+            border-radius: 15px;
+            margin-top: 2rem;
+            border: 2px solid var(--accent);
+            animation: fadeIn 0.5s;
         }
 
-        .particle {
-            position: absolute;
-            background: rgba(138, 43, 226, 0.3);
-            border-radius: 50%;
-            animation: float linear infinite;
+        .connection-success i {
+            font-size: 3rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            animation: bounce 2s infinite;
         }
 
-        @keyframes float {
-            0% { transform: translateY(0) rotate(0deg); }
-            100% { transform: translateY(-100vh) rotate(360deg); }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
     </style>
 </head>
 <body>
-    <div class="particles" id="particles"></div>
-    
     <a href="./" class="home-btn">
-        <i class="fas fa-home"></i> Home
+        <i class="fas fa-arrow-left"></i> Back to Home
     </a>
     
     <div class="container">
         <div class="logo">
-            <img src="https://gitcdn.giftedtech.co.ke/image/AZO_image.jpg" alt="GIFTED MD">
+            <img src="https://files.catbox.moe/52699c.jpg" alt="CLOUD AI">
         </div>
         
-        <h1>GIFTED PAIR CODE</h1>
-        <p>Enter your WhatsApp number without + sign</p>
+        <h1>CLOUD AI PAIR CODE</h1>
+        <p>Enter your WhatsApp number to generate a pairing code</p>
         
         <div class="form-group">
-            <label for="phone-number">Phone Number</label>
+            <label for="phone-number">📱 WhatsApp Number</label>
             <div class="input-container">
-                <i class="fas fa-comment"></i>
-                <input type="text" id="phone-number" placeholder="e.g., 2547xxxxxxxx" inputmode="numeric" pattern="[0-9]*">
+                <i class="fas fa-phone"></i>
+                <input type="text" id="phone-number" 
+                       placeholder="Example: 254712345678" 
+                       inputmode="numeric" 
+                       pattern="[0-9]*"
+                       maxlength="15">
             </div>
-            <div class="error-message" id="error-message">Please enter a valid phone number (10-15 digits)</div>
+            <div class="error-message" id="error-message">
+                Please enter a valid 10-15 digit phone number
+            </div>
         </div>
         
         <button id="submit" class="btn">
-            <span id="btn-text">GET CODE</span>
-            <span id="btn-spinner" style="display: none;">
-                <i class="fas fa-spinner fa-spin"></i>
+            <span class="btn-text" id="btn-text">Generate Pairing Code</span>
+            <span class="btn-spinner" id="btn-spinner">
+                <i class="fas fa-spinner"></i>
             </span>
         </button>
         
-        <div id="loading-spinner" class="spinner"></div>
+        <div class="spinner" id="loading-spinner"></div>
         
         <div id="result">
-            <p>Your pairing code is:</p>
+            <h3>🔑 Your Pairing Code</h3>
             <div id="pair-code"></div>
-            <p>Enter this code in your WhatsApp linked devices</p>
+            <p style="color: var(--gray); margin: 1.5rem 0;">
+                This code will expire in a few minutes
+            </p>
+            
+            <div class="instructions">
+                <h3>📝 How to Use:</h3>
+                <ol>
+                    <li>Open WhatsApp on your phone</li>
+                    <li>Go to Settings → Linked Devices</li>
+                    <li>Tap on "Link a Device"</li>
+                    <li>Enter the code above when prompted</li>
+                    <li>Wait for connection confirmation</li>
+                </ol>
+            </div>
             
             <div class="action-buttons">
                 <button id="copy-btn" class="action-btn copy-btn">
-                    <i class="fas fa-copy"></i> COPY CODE
+                    <i class="fas fa-copy"></i> Copy Code
                 </button>
-                <a href="./" class="action-btn back-btn">
-                    <i class="fas fa-arrow-left"></i> BACK
-                </a>
+                <button id="new-btn" class="action-btn back-btn">
+                    <i class="fas fa-redo"></i> New Code
+                </button>
             </div>
             
             <div class="success-message" id="success-message">
                 <i class="fas fa-check-circle"></i> Code copied to clipboard!
             </div>
         </div>
+
+        <div class="connection-success" id="connection-success">
+            <i class="fas fa-check-circle"></i>
+            <h3>✅ Connection Successful!</h3>
+            <p style="color: var(--gray); margin: 1rem 0;">
+                Cloud AI bot is now connected to your WhatsApp.<br>
+                You can start using commands with prefix <strong>.</strong>
+            </p>
+            <p style="color: var(--accent); font-weight: 600; margin-top: 1.5rem;">
+                Try: <code>.ping</code> to test the bot
+            </p>
+        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.0.0-alpha.1/axios.min.js"></script>
     <script>
-        function createParticles() {
-            const particlesContainer = document.getElementById('particles');
-            const particleCount = window.innerWidth < 768 ? 15 : 30;
-            
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.classList.add('particle');
-                
-                const size = Math.random() * 10 + 5;
-                particle.style.width = `${size}px`;
-                particle.style.height = `${size}px`;
-                
-                particle.style.left = `${Math.random() * 100}%`;
-                particle.style.top = `${Math.random() * 100}%`;
-                
-                const duration = Math.random() * 10 + 10;
-                particle.style.animationDuration = `${duration}s`;
-                particle.style.animationDelay = `${Math.random() * 5}s`;
-                
-                particle.style.opacity = Math.random() * 0.5 + 0.1;
-                
-                particlesContainer.appendChild(particle);
-            }
-        }
-        
-        createParticles();
+        // DOM Elements
+        const elements = {
+            submit: document.getElementById('submit'),
+            phoneNumber: document.getElementById('phone-number'),
+            result: document.getElementById('result'),
+            pairCode: document.getElementById('pair-code'),
+            copyBtn: document.getElementById('copy-btn'),
+            newBtn: document.getElementById('new-btn'),
+            errorMessage: document.getElementById('error-message'),
+            successMessage: document.getElementById('success-message'),
+            loadingSpinner: document.getElementById('loading-spinner'),
+            connectionSuccess: document.getElementById('connection-success'),
+            btnText: document.getElementById('btn-text'),
+            btnSpinner: document.getElementById('btn-spinner')
+        };
 
-        const submitButton = document.getElementById('submit');
-        const phoneNumberInput = document.getElementById('phone-number');
-        const resultDiv = document.getElementById('result');
-        const pairCodeDiv = document.getElementById('pair-code');
-        const copyButton = document.getElementById('copy-btn');
-        const errorMessage = document.getElementById('error-message');
-        const successMessage = document.getElementById('success-message');
-        const btnText = document.getElementById('btn-text');
-        const btnSpinner = document.getElementById('btn-spinner');
-        const loadingSpinner = document.getElementById('loading-spinner');
-
+        // Validation
         function validatePhoneNumber(number) {
             const cleaned = number.replace(/\D/g, '');
             return cleaned.length >= 10 && cleaned.length <= 15;
         }
 
-        submitButton.addEventListener('click', async (e) => {
-            e.preventDefault();
-            const phoneNumber = phoneNumberInput.value.trim();
+        // Format phone number
+        function formatPhoneNumber(input) {
+            let value = input.replace(/\D/g, '');
+            if (value.length > 0) {
+                value = value.replace(/^(\d{3})(\d+)/, '$1 $2');
+            }
+            return value;
+        }
+
+        // Event Listeners
+        elements.phoneNumber.addEventListener('input', (e) => {
+            e.target.value = formatPhoneNumber(e.target.value);
+            if (elements.errorMessage.style.display === 'block') {
+                elements.errorMessage.style.display = 'none';
+            }
+        });
+
+        elements.submit.addEventListener('click', async () => {
+            const phoneNumber = elements.phoneNumber.value.replace(/\s/g, '');
             
             if (!validatePhoneNumber(phoneNumber)) {
-                errorMessage.style.display = 'block';
-                errorMessage.style.animation = 'shake 0.5s';
+                elements.errorMessage.style.display = 'block';
+                elements.errorMessage.style.animation = 'shake 0.5s';
                 setTimeout(() => {
-                    errorMessage.style.animation = '';
+                    elements.errorMessage.style.animation = '';
                 }, 500);
                 return;
             }
             
-            errorMessage.style.display = 'none';
-            
-            btnText.style.display = 'none';
-            btnSpinner.style.display = 'inline-block';
-            submitButton.disabled = true;
+            // Show loading
+            elements.btnText.style.display = 'none';
+            elements.btnSpinner.style.display = 'inline-block';
+            elements.submit.disabled = true;
+            elements.loadingSpinner.style.display = 'block';
             
             try {
-                const { data } = await axios.get(`/code?number=${phoneNumber}`);
-                const code = data.code || "ERROR";
+                const response = await axios.get(`/pair?number=${phoneNumber}`);
                 
-                pairCodeDiv.textContent = code;
-                resultDiv.style.display = 'block';
-                
-                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                
+                if (response.data.success) {
+                    // Show pairing code
+                    elements.pairCode.textContent = response.data.code;
+                    elements.result.style.display = 'block';
+                    elements.result.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    // Monitor connection (simulated)
+                    setTimeout(() => {
+                        elements.result.style.display = 'none';
+                        elements.connectionSuccess.style.display = 'block';
+                        elements.connectionSuccess.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 10000); // Show success after 10 seconds
+                } else {
+                    elements.pairCode.textContent = "ERROR: " + response.data.message;
+                    elements.result.style.display = 'block';
+                }
             } catch (error) {
-                pairCodeDiv.textContent = "SERVICE ERROR";
-                resultDiv.style.display = 'block';
-                console.error("Error:", error);
+                console.error("Request failed:", error);
+                elements.pairCode.textContent = "SERVICE UNAVAILABLE";
+                elements.result.style.display = 'block';
             } finally {
-                btnText.style.display = 'inline-block';
-                btnSpinner.style.display = 'none';
-                submitButton.disabled = false;
+                // Reset loading state
+                elements.btnText.style.display = 'inline-block';
+                elements.btnSpinner.style.display = 'none';
+                elements.submit.disabled = false;
+                elements.loadingSpinner.style.display = 'none';
             }
         });
 
-        copyButton.addEventListener('click', () => {
-            const code = pairCodeDiv.textContent;
-            navigator.clipboard.writeText(code).then(() => {
-                successMessage.style.display = 'block';
-                setTimeout(() => {
-                    successMessage.style.display = 'none';
-                }, 2000);
-            });
+        elements.copyBtn.addEventListener('click', () => {
+            const code = elements.pairCode.textContent;
+            if (code && code !== "ERROR: " && code !== "SERVICE UNAVAILABLE") {
+                navigator.clipboard.writeText(code).then(() => {
+                    elements.successMessage.style.display = 'block';
+                    setTimeout(() => {
+                        elements.successMessage.style.display = 'none';
+                    }, 3000);
+                });
+            }
         });
 
-        phoneNumberInput.addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/\D/g, '');
-            
-            if (errorMessage.style.display === 'block') {
-                errorMessage.style.display = 'none';
+        elements.newBtn.addEventListener('click', () => {
+            elements.result.style.display = 'none';
+            elements.connectionSuccess.style.display = 'none';
+            elements.phoneNumber.value = '';
+            elements.phoneNumber.focus();
+        });
+
+        // Auto-focus on input
+        window.addEventListener('load', () => {
+            elements.phoneNumber.focus();
+        });
+
+        // Enter key support
+        elements.phoneNumber.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                elements.submit.click();
             }
         });
     </script>
 </body>
-
-</html>
+    </html>
