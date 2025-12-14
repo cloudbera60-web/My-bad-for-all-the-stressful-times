@@ -1,6 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const crypto = require('crypto');
 
 // Generate random ID
 function giftedId(num = 8) {
@@ -122,22 +121,27 @@ async function GiftedAntiLink(sock, message, mode) {
         const text = message.message?.conversation || 
                     message.message?.extendedTextMessage?.text || '';
         
-        if (text.includes('http://') || text.includes('https://') || 
-            text.includes('www.') || text.includes('.com')) {
-            
+        const linkPatterns = ['http://', 'https://', 'www.', '.com', '.net', '.org', '.me'];
+        const hasLink = linkPatterns.some(pattern => text.includes(pattern));
+        
+        if (hasLink) {
             const from = message.key.remoteJid;
-            const isGroup = from.endsWith('@g.us');
             
-            if (mode === 'delete' && isGroup) {
+            if (mode === 'delete') {
+                try {
+                    await sock.sendMessage(from, {
+                        delete: message.key
+                    });
+                } catch (deleteErr) {
+                    console.error("Delete message error:", deleteErr);
+                }
+                
                 await sock.sendMessage(from, {
-                    delete: message.key
-                });
-                await sock.sendMessage(from, {
-                    text: '⚠️ Links are not allowed in this group!'
+                    text: '⚠️ Links are not allowed here!'
                 });
             } else if (mode === 'warn') {
                 await sock.sendMessage(from, {
-                    text: '⚠️ Please avoid sharing links!',
+                    text: '⚠️ Please avoid sharing links in this chat!',
                     quoted: message
                 });
             }
@@ -190,20 +194,13 @@ async function GiftedPresence(sock, jid) {
     }
 }
 
-// Anti-delete function
+// Anti-delete function (simplified version)
 async function GiftedAntiDelete(sock, deletedMsg, key, deleter, originalSender, owner) {
     try {
-        const text = deletedMsg.message?.conversation || 
-                    deletedMsg.message?.extendedTextMessage?.text || 
-                    '[Media Message]';
-        
         const report = `🚨 *MESSAGE DELETED DETECTED*
         
-👤 *Deleted by:* ${deleter.split('@')[0]}
-📝 *Original sender:* ${originalSender.split('@')[0]}
-💬 *Message:* ${text.substring(0, 200)}${text.length > 200 ? '...' : ''}
-
-⚠️ Deletion detected in: ${key.remoteJid}`;
+👤 *Deleted by:* ${deleter?.split('@')[0] || 'Unknown'}
+💬 *In chat:* ${key.remoteJid}`;
 
         await sock.sendMessage(owner, { text: report });
     } catch (error) {
@@ -211,48 +208,11 @@ async function GiftedAntiDelete(sock, deletedMsg, key, deleter, originalSender, 
     }
 }
 
-// Chatbot function
+// Chatbot function (placeholder)
 async function GiftedChatBot(sock, mode, chatMode, createContext, createContext2, googleTTS) {
-    // Implementation depends on your chatbot service
-    console.log("Chatbot enabled in mode:", mode);
+    console.log(`Chatbot enabled in ${mode} mode`);
+    // Add your chatbot logic here
 }
-
-// Media buffer utilities
-async function getMediaBuffer(message) {
-    // Implementation for getting media buffer
-    return Buffer.from('');
-}
-
-function getFileContentType(buffer) {
-    // Implementation for file content type detection
-    return 'application/octet-stream';
-}
-
-function bufferToStream(buffer) {
-    // Implementation for buffer to stream conversion
-    const { Readable } = require('stream');
-    return Readable.from(buffer);
-}
-
-// Upload functions (placeholders)
-async function uploadToPixhost(buffer) { return ''; }
-async function uploadToImgBB(buffer) { return ''; }
-async function uploadToGithubCdn(buffer) { return ''; }
-async function uploadToGiftedCdn(buffer) { return ''; }
-async function uploadToPasteboard(buffer) { return ''; }
-async function uploadToCatbox(buffer) { return ''; }
-
-// API utilities
-const GiftedTechApi = '';
-const GiftedApiKey = '';
-
-// Format utilities
-async function formatAudio(buffer) { return buffer; }
-async function formatVideo(buffer) { return buffer; }
-
-// Buffer utilities
-const gmdBuffer = Buffer;
-const gmdJson = JSON;
 
 // Context creation
 function createContext(sender, options = {}) {
@@ -280,28 +240,6 @@ function createContext2(sender, options = {}) {
     };
 }
 
-// Verify JID state
-function verifyJidState(jid) {
-    return jid && jid.includes('@');
-}
-
-// Commit hash utilities
-function setCommitHash(hash) {
-    try {
-        fs.writeFileSync(path.join(__dirname, 'gift', 'commit.txt'), hash);
-    } catch (error) {
-        console.error("Error setting commit hash:", error);
-    }
-}
-
-function getCommitHash() {
-    try {
-        return fs.readFileSync(path.join(__dirname, 'gift', 'commit.txt'), 'utf8');
-    } catch (error) {
-        return 'unknown';
-    }
-}
-
 // Emojis for auto-react
 const emojis = ["❤️", "😂", "😮", "😍", "🔥", "👏", "🎉", "🙏", "👌", "🤔", "👍"];
 
@@ -312,27 +250,6 @@ const logger = {
     error: (...args) => console.error('[ERROR]', ...args),
     warn: (...args) => console.warn('[WARN]', ...args)
 };
-
-// Store class
-class gmdStore {
-    constructor() {
-        this.messages = new Map();
-    }
-    
-    loadMessage(jid, id) {
-        const key = `${jid}:${id}`;
-        return this.messages.get(key);
-    }
-    
-    saveMessage(jid, id, message) {
-        const key = `${jid}:${id}`;
-        this.messages.set(key, message);
-    }
-    
-    destroy() {
-        this.messages.clear();
-    }
-}
 
 // Export all functions
 module.exports = {
@@ -351,28 +268,8 @@ module.exports = {
     GiftedPresence,
     GiftedAntiDelete,
     GiftedChatBot,
-    getMediaBuffer,
-    getFileContentType,
-    bufferToStream,
-    uploadToPixhost,
-    uploadToImgBB,
-    uploadToGithubCdn,
-    uploadToGiftedCdn,
-    uploadToPasteboard,
-    uploadToCatbox,
-    formatAudio,
-    formatVideo,
-    gmdBuffer,
-    gmdJson,
     createContext,
     createContext2,
-    verifyJidState,
-    setCommitHash,
-    getCommitHash,
     emojis,
-    logger,
-    gmdStore,
-    GiftedTechApi,
-    GiftedApiKey,
-    commands: [] // Will be populated by plugins
+    logger
 };
