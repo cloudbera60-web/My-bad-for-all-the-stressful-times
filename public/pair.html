@@ -395,7 +395,7 @@
             </p>
         </div>
     </div>
-    <script>
+          <script>
     // DOM Elements
     const elements = {
         submit: document.getElementById('submit'),
@@ -451,8 +451,8 @@
         elements.loadingSpinner.style.display = 'block';
         
         try {
-            // Use the correct endpoint
-            const response = await fetch(`/pair?number=${encodeURIComponent(phoneNumber)}`);
+            // Use the correct endpoint (/code instead of /pair)
+            const response = await fetch(`/code?number=${encodeURIComponent(phoneNumber)}`);
             const data = await response.json();
             
             if (data.success) {
@@ -519,8 +519,9 @@
             elements.submit.click();
         }
     });
-        </script>
+</script>              
                 
 </body>
 </html>
+
 
