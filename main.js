@@ -1,43 +1,18 @@
 const { 
-    default: giftedConnect, 
-    isJidGroup, 
-    jidNormalizedUser,
-    isJidBroadcast,
-    downloadContentFromMessage,
-    DisconnectReason, 
-    getContentType,
-    fetchLatestBaileysVersion, 
-    useMultiFileAuthState, 
-    makeCacheableSignalKeyStore
+    default: giftedConnect,
+    useMultiFileAuthState,
+    fetchLatestBaileysVersion,
+    makeCacheableSignalKeyStore,
+    DisconnectReason
 } = require("@whiskeysockets/baileys");
 
-const { 
-    evt, 
-    logger,
-    emojis,
-    setSudo,
-    delSudo,
-    GiftedAutoReact,
-    GiftedAntiLink,
-    GiftedAutoBio,
-    GiftedChatBot,
-    loadSession,
-    getSudoNumbers,
-    createContext, 
-    createContext2,
-    GiftedPresence,
-    GiftedAntiDelete,
-    GiftedAnticall
-} = require("./gift");
-
 const pino = require("pino");
-const config = require("./config");
 const fs = require("fs-extra");
 const path = require("path");
 const { Boom } = require("@hapi/boom");
+const express = require("express");
 
 const PORT = process.env.PORT || 50900;
-const express = require("express");
 const app = express();
 
 // Import routes
@@ -60,13 +35,9 @@ app.get('/health', (req, res) => {
     });
 });
 
-// Serve HTML pages
+// Main routes
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, "public", "index.html"));
-});
-
-app.get('/pair-page', (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "pair.html"));
 });
 
 app.listen(PORT, () => {
@@ -90,17 +61,14 @@ async function startCloudAI() {
         
         const cloudSock = {
             version,
-            logger: pino({ level: "silent" }),
-            browser: ['CLOUD AI', "safari", "1.0.0"],
             auth: {
                 creds: state.creds,
-                keys: makeCacheableSignalKeyStore(state.keys, logger)
+                keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "fatal" }))
             },
-            getMessage: async (key) => {
-                return { conversation: 'Hello from Cloud AI' };
-            },
+            printQRInTerminal: false,
+            logger: pino({ level: "fatal" }),
+            browser: ['CLOUD AI', "safari", "1.0.0"],
             connectTimeoutMs: 60000,
-            defaultQueryTimeoutMs: 60000,
             keepAliveIntervalMs: 10000,
             markOnlineOnConnect: true,
             syncFullHistory: false,
@@ -110,140 +78,7 @@ async function startCloudAI() {
         Gifted = giftedConnect(cloudSock);
         console.log("🤖 Cloud AI instance created");
 
-        Gifted.ev.process(async (events) => {
-            if (events['creds.update']) {
-                await saveCreds();
-            }
-        });
-
-        // Auto React
-        if (config.AUTO_REACT === "true") {
-            Gifted.ev.on('messages.upsert', async (mek) => {
-                const ms = mek.messages[0];
-                try {
-                    if (ms.key.fromMe) return;
-                    if (!ms.key.fromMe && ms.message) {
-                        const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
-                        await GiftedAutoReact(randomEmoji, ms, Gifted);
-                    }
-                } catch (err) {
-                    // Ignore auto-react errors
-                }
-            });
-        }
-
-        // Auto Bio
-        if (config.AUTO_BIO === 'true') {
-            setTimeout(() => GiftedAutoBio(Gifted), 1000);
-            setInterval(() => GiftedAutoBio(Gifted), 1000 * 60);
-        }
-
-        // Anti-call
-        if (config.ANTICALL === "true") {
-            Gifted.ev.on("call", async (json) => {
-                await GiftedAnticall(json, Gifted);
-            });
-        }
-
-        // Presence
-        if (config.PRESENCE === "true") {
-            Gifted.ev.on("messages.upsert", async ({ messages }) => {
-                if (messages && messages.length > 0) {
-                    await GiftedPresence(Gifted, messages[0].key.remoteJid);
-                }
-            });
-        }
-
-        // Connection presence
-        Gifted.ev.on("connection.update", ({ connection }) => {
-            if (connection === "open") {
-                console.log("✅ Cloud AI Connected to WhatsApp!");
-                GiftedPresence(Gifted, "status@broadcast");
-            }
-        });
-
-        // Chatbot
-        if (config.CHATBOT === 'true' || config.CHATBOT === 'audio') {
-            const googleTTS = require("google-tts-api");
-            GiftedChatBot(Gifted, config.CHATBOT, config.CHATBOT_MODE, createContext, createContext2, googleTTS);
-        }
-        
-        // Anti-link
-        if (config.ANTILINK !== 'false') {
-            Gifted.ev.on('messages.upsert', async ({ messages }) => {
-                const message = messages[0];
-                if (!message?.message || message.key.fromMe) return;
-                await GiftedAntiLink(Gifted, message, config.ANTILINK);
-            });
-        }
-
-        // Load commands
-        try {
-            const commandsPath = path.join(__dirname, "gifted");
-            if (fs.existsSync(commandsPath)) {
-                const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
-                console.log(`📂 Found ${commandFiles.length} command files`);
-                
-                commandFiles.forEach((fileName) => {
-                    try {
-                        require(path.join(commandsPath, fileName));
-                        console.log(`✅ Loaded command: ${fileName}`);
-                    } catch (e) {
-                        console.error(`❌ Failed to load ${fileName}:`, e.message);
-                    }
-                });
-            } else {
-                console.log("📂 No commands folder found, creating one...");
-                fs.mkdirSync(commandsPath, { recursive: true });
-                
-                // Create basic ping command
-                const pingCode = `const { evt } = require('../gift');
-
-evt({
-    pattern: 'ping',
-    fromMe: false,
-    desc: 'Check bot response time'
-}, async (message, sock, match) => {
-    const start = Date.now();
-    await sock.sendMessage(message, { 
-        text: '🏓 Pong!'
-    }, { quoted: match.m });
-    
-    const latency = Date.now() - start;
-    
-    await sock.sendMessage(message, { 
-        text: \`*🤖 CLOUD AI Status*\\n\\n⏱️ Response Time: *\${latency}ms*\\n⚡ Status: *Online*\\n🌐 Mode: *\${match.config.MODE}*\`
-    }, { quoted: match.m });
-});
-
-evt({
-    pattern: 'help',
-    fromMe: false,
-    desc: 'Show all commands'
-}, async (message, sock, match) => {
-    const commands = match.evt.commands;
-    
-    let helpText = \`*🤖 CLOUD AI COMMANDS*\\n\\n\`;
-    helpText += \`Prefix: *\${match.config.PREFIX}*\\n\\n\`;
-    
-    commands.forEach(cmd => {
-        helpText += \`• *\${match.config.PREFIX}\${cmd.pattern}* - \${cmd.desc}\\n\`;
-    });
-    
-    helpText += \`\\n\${match.config.FOOTER}\`;
-    
-    await sock.sendMessage(message, { 
-        text: helpText
-    }, { quoted: match.m });
-});`;
-                
-                fs.writeFileSync(path.join(commandsPath, 'ping.js'), pingCode);
-                console.log("✅ Created default ping.js command");
-                require(path.join(commandsPath, 'ping.js'));
-            }
-        } catch (error) {
-            console.error("❌ Error loading commands:", error.message);
-        }
+        Gifted.ev.on('creds.update', saveCreds);
 
         // Message handler
         Gifted.ev.on("messages.upsert", async ({ messages }) => {
@@ -251,91 +86,42 @@ evt({
             if (!ms?.message || !ms?.key) return;
 
             const from = ms.key.remoteJid;
-            const isGroup = from.endsWith("@g.us");
-            
-            let groupInfo = null;
-            if (isGroup) {
-                try {
-                    groupInfo = await Gifted.groupMetadata(from);
-                } catch (err) {
-                    console.error("Group metadata error:", err);
-                }
-            }
-
-            const pushName = ms.pushName || 'Cloud AI User';
             const text = ms.message?.conversation || 
-                        ms.message?.extendedTextMessage?.text || 
-                        ms.message?.imageMessage?.caption || 
-                        ms.message?.videoMessage?.caption || '';
+                        ms.message?.extendedTextMessage?.text || '';
             
-            const isCommand = text.startsWith(config.PREFIX);
-            const command = isCommand ? text.slice(config.PREFIX.length).trim().split(' ')[0].toLowerCase() : '';
-
-            if (isCommand && command) {
-                // Auto read if enabled
-                if (config.AUTO_READ_MESSAGES === "true" || config.AUTO_READ_MESSAGES === "commands") {
-                    await Gifted.readMessages([ms.key]).catch(() => {});
-                }
-
-                // Find command
-                const cmd = evt.commands.find(c => 
-                    c.pattern === command || 
-                    (Array.isArray(c.aliases) && c.aliases.includes(command))
-                );
-
-                if (cmd) {
-                    // Check for private mode
-                    if (config.MODE?.toLowerCase() === "private") {
-                        const sudoNumbers = getSudoNumbers() || [];
-                        const senderNumber = ms.key.participant?.split('@')[0] || ms.key.remoteJid.split('@')[0];
-                        const ownerNumber = config.OWNER_NUMBER.replace(/\D/g, '');
-                        const isAllowed = sudoNumbers.includes(senderNumber) || 
-                                         senderNumber === ownerNumber;
-                        
-                        if (!isAllowed) {
-                            await Gifted.sendMessage(from, { 
-                                text: "⚠️ This bot is in private mode. Contact owner for access."
-                            }, { quoted: ms }).catch(() => {});
-                            return;
-                        }
-                    }
-
-                    try {
-                        // Execute command
-                        const args = text.slice(config.PREFIX.length + command.length).trim().split(' ');
-                        
-                        const context = {
-                            m: ms,
-                            from,
-                            sender: ms.key.participant || from,
-                            pushName,
-                            isGroup,
-                            groupInfo,
-                            isAdmin: false,
-                            isBotAdmin: false,
-                            reply: (text) => {
-                                Gifted.sendMessage(from, { text }, { quoted: ms }).catch(() => {});
-                            },
-                            react: async (emoji) => {
-                                await Gifted.sendMessage(from, { 
-                                    react: { key: ms.key, text: emoji }
-                                }).catch(() => {});
-                            },
-                            config,
-                            evt,
-                            createContext,
-                            args
-                        };
-
-                        await cmd.function(from, Gifted, context);
-
-                    } catch (error) {
-                        console.error(`Command error [${command}]:`, error);
-                        await Gifted.sendMessage(from, {
-                            text: `❌ Command error: ${error.message}`
-                        }, { quoted: ms }).catch(() => {});
-                    }
-                }
+            // Handle ping command
+            if (text === '.ping' || text === '.ping') {
+                const start = Date.now();
+                await Gifted.sendMessage(from, { 
+                    text: '🏓 Pong!'
+                }, { quoted: ms });
+                
+                const latency = Date.now() - start;
+                
+                await Gifted.sendMessage(from, { 
+                    text: `*🤖 CLOUD AI Status*\n\n⏱️ Response Time: *${latency}ms*\n⚡ Status: *Online*\n🌐 Bot: *CLOUD AI*`
+                }, { quoted: ms });
+            }
+            
+            // Handle help command
+            if (text === '.help' || text === '.help') {
+                const helpText = `*🤖 CLOUD AI COMMANDS*\n\n` +
+                               `• *.ping* - Check bot response time\n` +
+                               `• *.help* - Show this help menu\n` +
+                               `• *.owner* - Contact bot owner\n` +
+                               `• *.sticker* - Create sticker from image\n` +
+                               `\n*ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴄʟᴏᴜᴅ ᴀɪ*`;
+                
+                await Gifted.sendMessage(from, { 
+                    text: helpText
+                }, { quoted: ms });
+            }
+            
+            // Handle owner command
+            if (text === '.owner' || text === '.owner') {
+                await Gifted.sendMessage(from, { 
+                    text: `*👤 Bot Owner*\n\n📱 Number: *254715206562*\n👤 Name: *Cloud Dev*\n\n💬 Contact for support or queries.`
+                }, { quoted: ms });
             }
         });
 
@@ -352,30 +138,15 @@ evt({
                 reconnectAttempts = 0;
                 
                 // Send startup message
-                if (config.STARTING_MESSAGE === "true" && Gifted.user?.id) {
-                    try {
-                        const startupMsg = `
-*${config.BOT_NAME} CONNECTED*
-
-🤖 *Bot Info:*
-• Prefix: *${config.PREFIX}*
-• Mode: *${config.MODE}*
-• Version: *${config.VERSION}*
-• Owner: *${config.OWNER_NAME}*
-
-🌐 *Links:*
-• Repository: ${config.BOT_REPO}
-• Updates: ${config.NEWSLETTER_URL}
-
-${config.CAPTION}`;
-
-                        await Gifted.sendMessage(Gifted.user.id, {
-                            text: startupMsg
-                        });
-                        console.log("📨 Startup message sent");
-                    } catch (msgError) {
-                        console.error("Startup message error:", msgError);
-                    }
+                try {
+                    const startupMsg = `*CLOUD AI CONNECTED*\n\n🤖 Bot is now online and ready!\nUse *.help* to see available commands.`;
+                    
+                    await Gifted.sendMessage(Gifted.user.id, {
+                        text: startupMsg
+                    });
+                    console.log("📨 Startup message sent");
+                } catch (msgError) {
+                    console.error("Startup message error:", msgError);
                 }
             }
 
@@ -426,3 +197,5 @@ setTimeout(() => {
         reconnectWithRetry();
     });
 }, 3000);
+
+module.exports = app;
