@@ -15,7 +15,7 @@ function giftedId(num = 8) {
 function generateRandomCode() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let result = '';
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 6; i++) {
         result += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return result;
@@ -35,7 +35,7 @@ async function removeFile(FilePath) {
 
 // Load session data
 function loadSession() {
-    const sessionPath = path.join(__dirname, 'gift', 'session');
+    const sessionPath = path.join(__dirname, 'session');
     if (!fs.existsSync(sessionPath)) {
         fs.mkdirSync(sessionPath, { recursive: true });
     }
@@ -121,27 +121,14 @@ async function GiftedAntiLink(sock, message, mode) {
         const text = message.message?.conversation || 
                     message.message?.extendedTextMessage?.text || '';
         
-        const linkPatterns = ['http://', 'https://', 'www.', '.com', '.net', '.org', '.me'];
-        const hasLink = linkPatterns.some(pattern => text.includes(pattern));
-        
-        if (hasLink) {
+        if (text.includes('http://') || text.includes('https://') || 
+            text.includes('www.') || text.includes('.com')) {
+            
             const from = message.key.remoteJid;
             
-            if (mode === 'delete') {
-                try {
-                    await sock.sendMessage(from, {
-                        delete: message.key
-                    });
-                } catch (deleteErr) {
-                    console.error("Delete message error:", deleteErr);
-                }
-                
+            if (mode === 'warn') {
                 await sock.sendMessage(from, {
-                    text: '⚠️ Links are not allowed here!'
-                });
-            } else if (mode === 'warn') {
-                await sock.sendMessage(from, {
-                    text: '⚠️ Please avoid sharing links in this chat!',
+                    text: '⚠️ Please avoid sharing links!',
                     quoted: message
                 });
             }
@@ -157,7 +144,7 @@ async function GiftedAutoBio(sock) {
         const statuses = [
             "🤖 CLOUD AI | Advanced WhatsApp Bot",
             "⚡ Powered by Cloud AI Technology",
-            "🌟 .help for commands | .owner for support",
+            "🌟 .help for commands",
             "🚀 Running on Cloud Infrastructure",
             "💫 Connected via Web Services"
         ];
@@ -165,7 +152,7 @@ async function GiftedAutoBio(sock) {
         const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
         await sock.updateProfileStatus(randomStatus);
     } catch (error) {
-        console.error("Auto-bio error:", error);
+        // Ignore bio update errors
     }
 }
 
@@ -190,11 +177,11 @@ async function GiftedPresence(sock, jid) {
     try {
         await sock.sendPresenceUpdate('available', jid);
     } catch (error) {
-        console.error("Presence error:", error);
+        // Ignore presence errors
     }
 }
 
-// Anti-delete function (simplified version)
+// Anti-delete function
 async function GiftedAntiDelete(sock, deletedMsg, key, deleter, originalSender, owner) {
     try {
         const report = `🚨 *MESSAGE DELETED DETECTED*
@@ -208,10 +195,9 @@ async function GiftedAntiDelete(sock, deletedMsg, key, deleter, originalSender, 
     }
 }
 
-// Chatbot function (placeholder)
+// Chatbot function
 async function GiftedChatBot(sock, mode, chatMode, createContext, createContext2, googleTTS) {
     console.log(`Chatbot enabled in ${mode} mode`);
-    // Add your chatbot logic here
 }
 
 // Context creation
