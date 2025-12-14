@@ -1,201 +1,133 @@
 const { 
+    giftedId,
+    removeFile,
+    generateRandomCode
+} = require('../gift');
+const express = require('express');
+const fs = require('fs');
+const path = require('path');
+let router = express.Router();
+const pino = require("pino");
+const {
     default: giftedConnect,
     useMultiFileAuthState,
+    delay,
     fetchLatestBaileysVersion,
     makeCacheableSignalKeyStore,
-    DisconnectReason
+    Browsers
 } = require("@whiskeysockets/baileys");
 
-const pino = require("pino");
-const fs = require("fs-extra");
-const path = require("path");
-const { Boom } = require("@hapi/boom");
-const express = require("express");
+const sessionDir = path.join(__dirname, "..", "session");
 
-const PORT = process.env.PORT || 50900;
-const app = express();
+// Serve HTML page if no number parameter
+router.get('/', async (req, res) => {
+    const num = req.query.number;
+    
+    // If no number provided, serve HTML page
+    if (!num) {
+        return res.sendFile(path.join(__dirname, '..', 'public', 'pair.html'));
+    }
+    
+    // If number provided, process pairing
+    const id = giftedId();
+    let responseSent = false;
+    let sessionCleanedUp = false;
 
-// Import routes
-const { qrRoute, pairRoute } = require('./routes');
+    async function cleanUpSession() {
+        if (!sessionCleanedUp) {
+            try {
+                await removeFile(path.join(sessionDir, id));
+            } catch (cleanupError) {
+                console.error("Cleanup error:", cleanupError);
+            }
+            sessionCleanedUp = true;
+        }
+    }
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "public")));
-
-// Use routes
-app.use('/qr', qrRoute);
-app.use('/pair', pairRoute);
-
-// Health check
-app.get('/health', (req, res) => {
-    res.json({
-        status: 200,
-        service: 'CLOUD AI Bot',
-        timestamp: new Date().toISOString()
-    });
-});
-
-// Main routes
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "index.html"));
-});
-
-app.listen(PORT, () => {
-    console.log(`✅ Cloud AI Server running on port ${PORT}`);
-});
-
-// Bot initialization
-const sessionDir = path.join(__dirname, "session");
-let Gifted;
-let reconnectAttempts = 0;
-const MAX_RECONNECT_ATTEMPTS = 50;
-const RECONNECT_DELAY = 5000;
-
-async function startCloudAI() {
-    try {
-        console.log("🔄 Starting Cloud AI Bot...");
+    async function CLOUD_AI_PAIR() {
         const { version } = await fetchLatestBaileysVersion();
-        const { state, saveCreds } = await useMultiFileAuthState(sessionDir);
+        const { state, saveCreds } = await useMultiFileAuthState(path.join(sessionDir, id));
         
-        console.log("📁 Session loaded from:", sessionDir);
-        
-        const cloudSock = {
-            version,
-            auth: {
-                creds: state.creds,
-                keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "fatal" }))
-            },
-            printQRInTerminal: false,
-            logger: pino({ level: "fatal" }),
-            browser: ['CLOUD AI', "safari", "1.0.0"],
-            connectTimeoutMs: 60000,
-            keepAliveIntervalMs: 10000,
-            markOnlineOnConnect: true,
-            syncFullHistory: false,
-            generateHighQualityLinkPreview: false
-        };
+        try {
+            let Gifted = giftedConnect({
+                version,
+                auth: {
+                    creds: state.creds,
+                    keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "fatal" }).child({ level: "fatal" })),
+                },
+                printQRInTerminal: false,
+                logger: pino({ level: "fatal" }),
+                browser: Browsers.macOS("Safari"),
+                syncFullHistory: false,
+                generateHighQualityLinkPreview: true,
+                connectTimeoutMs: 60000,
+                keepAliveIntervalMs: 30000
+            });
 
-        Gifted = giftedConnect(cloudSock);
-        console.log("🤖 Cloud AI instance created");
-
-        Gifted.ev.on('creds.update', saveCreds);
-
-        // Message handler
-        Gifted.ev.on("messages.upsert", async ({ messages }) => {
-            const ms = messages[0];
-            if (!ms?.message || !ms?.key) return;
-
-            const from = ms.key.remoteJid;
-            const text = ms.message?.conversation || 
-                        ms.message?.extendedTextMessage?.text || '';
-            
-            // Handle ping command
-            if (text === '.ping' || text === '.ping') {
-                const start = Date.now();
-                await Gifted.sendMessage(from, { 
-                    text: '🏓 Pong!'
-                }, { quoted: ms });
+            if (!Gifted.authState.creds.registered) {
+                await delay(1500);
+                const cleanNum = num.replace(/[^0-9]/g, '');
                 
-                const latency = Date.now() - start;
+                // Use the same pairing code method as your working code
+                const randomCode = generateRandomCode();
+                const code = await Gifted.requestPairingCode(cleanNum);
                 
-                await Gifted.sendMessage(from, { 
-                    text: `*🤖 CLOUD AI Status*\n\n⏱️ Response Time: *${latency}ms*\n⚡ Status: *Online*\n🌐 Bot: *CLOUD AI*`
-                }, { quoted: ms });
-            }
-            
-            // Handle help command
-            if (text === '.help' || text === '.help') {
-                const helpText = `*🤖 CLOUD AI COMMANDS*\n\n` +
-                               `• *.ping* - Check bot response time\n` +
-                               `• *.help* - Show this help menu\n` +
-                               `• *.owner* - Contact bot owner\n` +
-                               `• *.sticker* - Create sticker from image\n` +
-                               `\n*ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴄʟᴏᴜᴅ ᴀɪ*`;
-                
-                await Gifted.sendMessage(from, { 
-                    text: helpText
-                }, { quoted: ms });
-            }
-            
-            // Handle owner command
-            if (text === '.owner' || text === '.owner') {
-                await Gifted.sendMessage(from, { 
-                    text: `*👤 Bot Owner*\n\n📱 Number: *254715206562*\n👤 Name: *Cloud Dev*\n\n💬 Contact for support or queries.`
-                }, { quoted: ms });
-            }
-        });
-
-        // Connection events
-        Gifted.ev.on("connection.update", async (update) => {
-            const { connection, lastDisconnect } = update;
-            
-            if (connection === "connecting") {
-                console.log("🔄 Connecting to WhatsApp...");
-            }
-
-            if (connection === "open") {
-                console.log("✅ Cloud AI is online and ready!");
-                reconnectAttempts = 0;
-                
-                // Send startup message
-                try {
-                    const startupMsg = `*CLOUD AI CONNECTED*\n\n🤖 Bot is now online and ready!\nUse *.help* to see available commands.`;
-                    
-                    await Gifted.sendMessage(Gifted.user.id, {
-                        text: startupMsg
+                if (!responseSent && !res.headersSent) {
+                    res.json({ 
+                        code: code,
+                        success: true,
+                        message: "Pairing code generated"
                     });
-                    console.log("📨 Startup message sent");
-                } catch (msgError) {
-                    console.error("Startup message error:", msgError);
+                    responseSent = true;
                 }
             }
 
-            if (connection === "close") {
-                const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
-                console.log(`🔌 Connection closed: ${reason}`);
-                
-                if (reason === DisconnectReason.badSession || reason === DisconnectReason.loggedOut) {
-                    console.log("❌ Bad session or logged out. Please re-authenticate.");
-                    process.exit(1);
-                } else {
-                    console.log("🔄 Reconnecting...");
-                    setTimeout(reconnectWithRetry, RECONNECT_DELAY);
+            Gifted.ev.on('creds.update', saveCreds);
+            Gifted.ev.on("connection.update", async (s) => {
+                const { connection, lastDisconnect } = s;
+
+                if (connection === "open") {
+                    console.log("✅ WhatsApp Connected via Pair Code");
+                    
+                    // Send welcome message
+                    await Gifted.sendMessage(Gifted.user.id, {
+                        text: `*🤖 CLOUD AI Activated!*\n\nYour WhatsApp is now connected to Cloud AI bot.\n\nUse *.* to access commands.\n\nType *.help* to see available commands.\n\nEnjoy! 🚀`
+                    });
+
+                    // Keep connection alive for 30 seconds then close
+                    await delay(30000);
+                    await Gifted.ws.close();
+                } else if (connection === "close" && lastDisconnect && lastDisconnect.error) {
+                    console.log("Connection closed");
+                    await cleanUpSession();
                 }
+            });
+
+        } catch (err) {
+            console.error("Main error:", err);
+            if (!responseSent && !res.headersSent) {
+                res.status(500).json({ 
+                    code: "Service is Currently Unavailable",
+                    success: false
+                });
+                responseSent = true;
             }
-        });
-
-    } catch (error) {
-        console.error('❌ Bot initialization error:', error.message);
-        setTimeout(reconnectWithRetry, RECONNECT_DELAY);
-    }
-}
-
-async function reconnectWithRetry() {
-    if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-        console.error('❌ Max reconnection attempts reached');
-        process.exit(1);
+            await cleanUpSession();
+        }
     }
 
-    reconnectAttempts++;
-    const delay = Math.min(RECONNECT_DELAY * Math.pow(2, reconnectAttempts - 1), 30000);
-    
-    console.log(`🔄 Reconnection attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS} in ${delay}ms...`);
-    
-    setTimeout(() => {
-        startCloudAI().catch(err => {
-            console.error('❌ Reconnection failed:', err.message);
-            reconnectWithRetry();
-        });
-    }, delay);
-}
+    try {
+        await CLOUD_AI_PAIR();
+    } catch (finalError) {
+        console.error("Final error:", finalError);
+        await cleanUpSession();
+        if (!responseSent && !res.headersSent) {
+            res.status(500).json({ 
+                code: "Service Error",
+                success: false
+            });
+        }
+    }
+});
 
-// Start the bot
-console.log("🚀 Starting Cloud AI Bot System...");
-setTimeout(() => {
-    startCloudAI().catch(err => {
-        console.error("❌ Initialization error:", err.message);
-        reconnectWithRetry();
-    });
-}, 3000);
-
-module.exports = app;
+module.exports = router;
