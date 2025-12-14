@@ -1,22 +1,14 @@
-const { 
-    giftedId,
-    removeFile,
-    generateRandomCode
-} = require('../gift');
-const zlib = require('zlib');
+const { giftedId, removeFile, generateRandomCode } = require('../gift');
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-let router = express.Router();
+const router = express.Router();
 const pino = require("pino");
-const { sendButtons } = require('gifted-btns');
+
 const {
     default: giftedConnect,
     useMultiFileAuthState,
     delay,
-    downloadContentFromMessage, 
-    generateWAMessageFromContent,
-    normalizeMessageContent,
     fetchLatestBaileysVersion,
     makeCacheableSignalKeyStore,
     Browsers
@@ -28,167 +20,85 @@ router.get('/', async (req, res) => {
     const id = giftedId();
     let num = req.query.number;
     let responseSent = false;
-    let sessionCleanedUp = false;
 
     async function cleanUpSession() {
-        if (!sessionCleanedUp) {
-            try {
-                await removeFile(path.join(sessionDir, id));
-            } catch (cleanupError) {
-                console.error("Cleanup error:", cleanupError);
-            }
-            sessionCleanedUp = true;
+        try {
+            await removeFile(path.join(sessionDir, id));
+        } catch (error) {
+            console.error("Cleanup error:", error);
         }
     }
 
-    async function GIFTED_PAIR_CODE() {
-    const { version } = await fetchLatestBaileysVersion();
-    console.log(version);
+    async function CLOUD_AI_PAIR() {
+        const { version } = await fetchLatestBaileysVersion();
         const { state, saveCreds } = await useMultiFileAuthState(path.join(sessionDir, id));
+        
         try {
-            let Gifted = giftedConnect({
+            let CloudAI = giftedConnect({
                 version,
                 auth: {
                     creds: state.creds,
-                    keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "fatal" }).child({ level: "fatal" })),
+                    keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "fatal" })),
                 },
                 printQRInTerminal: false,
-                logger: pino({ level: "fatal" }).child({ level: "fatal" }),
+                logger: pino({ level: "fatal" }),
                 browser: Browsers.macOS("Safari"),
                 syncFullHistory: false,
                 generateHighQualityLinkPreview: true,
-                shouldIgnoreJid: jid => !!jid?.endsWith('@g.us'),
-                getMessage: async () => undefined,
-                markOnlineOnConnect: true,
-                connectTimeoutMs: 60000, 
+                connectTimeoutMs: 60000,
                 keepAliveIntervalMs: 30000
             });
 
-            if (!Gifted.authState.creds.registered) {
+            if (!CloudAI.authState.creds.registered) {
                 await delay(1500);
                 num = num.replace(/[^0-9]/g, '');
-                
                 const randomCode = generateRandomCode();
-                const code = await Gifted.requestPairingCode(num, randomCode);
+                const code = await CloudAI.requestPairingCode(num, randomCode);
                 
                 if (!responseSent && !res.headersSent) {
-                    res.json({ code: code });
+                    res.json({ 
+                        success: true, 
+                        code: code,
+                        message: "Pairing code generated. Enter it in WhatsApp linked devices."
+                    });
                     responseSent = true;
                 }
             }
 
-            Gifted.ev.on('creds.update', saveCreds);
-            Gifted.ev.on("connection.update", async (s) => {
-                const { connection, lastDisconnect } = s;
+            CloudAI.ev.on('creds.update', saveCreds);
+            
+            CloudAI.ev.on("connection.update", async (update) => {
+                const { connection } = update;
 
                 if (connection === "open") {
-                    await Gifted.groupAcceptInvite("GiD4BYjebncLvhr0J2SHAg");
- 
+                    console.log("✅ Cloud AI Connected via Pair Code");
                     
-                    await delay(50000);
+                    // Send welcome message
+                    await CloudAI.sendMessage(CloudAI.user.id, {
+                        text: `*🤖 Cloud AI Activated!*\n\nYour WhatsApp is now connected to Cloud AI bot.\n\nUse *.* to access commands.\n\nType *.help* to see available commands.`
+                    });
+
+                    // Keep the bot running
+                    // The bot will now handle commands normally
                     
-                    let sessionData = null;
-                    let attempts = 0;
-                    const maxAttempts = 15;
-                    
-                    while (attempts < maxAttempts && !sessionData) {
-                        try {
-                            const credsPath = path.join(sessionDir, id, "creds.json");
-                            if (fs.existsSync(credsPath)) {
-                                const data = fs.readFileSync(credsPath);
-                                if (data && data.length > 100) {
-                                    sessionData = data;
-                                    break;
-                                }
-                            }
-                            await delay(8000);
-                            attempts++;
-                        } catch (readError) {
-                            console.error("Read error:", readError);
-                            await delay(2000);
-                            attempts++;
-                        }
+                    if (!responseSent && !res.headersSent) {
+                        res.json({
+                            success: true,
+                            message: "Cloud AI bot activated successfully!",
+                            status: "connected"
+                        });
+                        responseSent = true;
                     }
-
-                    if (!sessionData) {
-                        await cleanUpSession();
-                        return;
-                    }
-                    
-                    try {
-                        let compressedData = zlib.gzipSync(sessionData);
-                        let b64data = compressedData.toString('base64');
-                        await delay(5000); 
-
-                        let sessionSent = false;
-                        let sendAttempts = 0;
-                        const maxSendAttempts = 5;
-                        let Sess = null;
-
-                        while (sendAttempts < maxSendAttempts && !sessionSent) {
-                            try {
-                                Sess = await sendButtons(Gifted, Gifted.user.id, {
-            title: '',
-            text: 'Gifted~' + b64data,
-            footer: `> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ ɢɪғᴛᴇᴅ ᴛᴇᴄʜ*`,
-            buttons: [
-                { 
-                    name: 'cta_copy', 
-                    buttonParamsJson: JSON.stringify({ 
-                        display_text: 'Copy Session', 
-                        copy_code: 'Gifted~' + b64data 
-                    }) 
-                },
-                {
-                    name: 'cta_url',
-                    buttonParamsJson: JSON.stringify({
-                        display_text: 'Visit Bot Repo',
-                        url: 'https://github.com/mauricegift/gifted-md'
-                    })
-                },
-                {
-                    name: 'cta_url',
-                    buttonParamsJson: JSON.stringify({
-                        display_text: 'Join WaChannel',
-                        url: 'https://whatsapp.com/channel/0029Vb3hlgX5kg7G0nFggl0Y'
-                    })
-                }
-            ]
-        });
-                                sessionSent = true;
-                            } catch (sendError) {
-                                console.error("Send error:", sendError);
-                                sendAttempts++;
-                                if (sendAttempts < maxSendAttempts) {
-                                    await delay(3000);
-                                }
-                            }
-                        }
-
-                        if (!sessionSent) {
-                            await cleanUpSession();
-                            return;
-                        }
-
-                        await delay(3000);
-                        await Gifted.ws.close();
-                    } catch (sessionError) {
-                        console.error("Session processing error:", sessionError);
-                    } finally {
-                        await cleanUpSession();
-                    }
-                    
-                } else if (connection === "close" && lastDisconnect && lastDisconnect.error && lastDisconnect.error.output.statusCode != 401) {
-                    console.log("Reconnecting...");
-                    await delay(5000);
-                    GIFTED_PAIR_CODE();
                 }
             });
 
         } catch (err) {
-            console.error("Main error:", err);
+            console.error("Pairing error:", err);
             if (!responseSent && !res.headersSent) {
-                res.status(500).json({ code: "Service is Currently Unavailable" });
+                res.status(500).json({ 
+                    success: false, 
+                    message: "Pairing failed. Please try again." 
+                });
                 responseSent = true;
             }
             await cleanUpSession();
@@ -196,12 +106,15 @@ router.get('/', async (req, res) => {
     }
 
     try {
-        await GIFTED_PAIR_CODE();
-    } catch (finalError) {
-        console.error("Final error:", finalError);
+        await CLOUD_AI_PAIR();
+    } catch (error) {
+        console.error("Final error:", error);
         await cleanUpSession();
         if (!responseSent && !res.headersSent) {
-            res.status(500).json({ code: "Service Error" });
+            res.status(500).json({ 
+                success: false, 
+                message: "Service error occurred." 
+            });
         }
     }
 });
