@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CLOUD AI | Pair Code</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CLOUD AI | PAIR CODE</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -13,319 +13,280 @@
             --dark: #0d1b2a;
             --light: #e0e1dd;
             --gray: #8d99ae;
+            --gradient: linear-gradient(135deg, #3a86ff 0%, #4361ee 50%, #06d6a0 100%);
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: linear-gradient(135deg, var(--dark), #1b263b);
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--dark);
             color: var(--light);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(58, 134, 255, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(6, 214, 160, 0.15) 0%, transparent 20%);
         }
-        
-        .container {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 500px;
-            width: 100%;
-            border: 1px solid rgba(58, 134, 255, 0.2);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            text-align: center;
-            animation: fadeIn 0.5s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .back-btn {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(58, 134, 255, 0.1);
-            color: var(--primary);
-            padding: 10px 20px;
-            border-radius: 25px;
+
+        .home-btn {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: var(--gradient);
+            color: white;
+            padding: 0.8rem 1.8rem;
+            border-radius: 30px;
+            font-weight: 700;
             text-decoration: none;
+            box-shadow: var(--shadow);
+            z-index: 100;
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(58, 134, 255, 0.3);
+            gap: 0.8rem;
+            transition: var(--transition);
         }
-        
-        .back-btn:hover {
-            background: rgba(58, 134, 255, 0.2);
-            transform: translateX(-5px);
+
+        .home-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(58, 134, 255, 0.4);
         }
-        
+
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 3rem;
+            border-radius: 25px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(58, 134, 255, 0.2);
+            backdrop-filter: blur(20px);
+        }
+
         .logo {
             width: 100px;
             height: 100px;
-            margin: 0 auto 20px;
+            margin: 0 auto 2rem;
+            position: relative;
         }
-        
+
         .logo img {
             width: 100%;
             height: 100%;
             border-radius: 50%;
+            object-fit: cover;
             border: 3px solid var(--primary);
-            box-shadow: 0 0 20px rgba(58, 134, 255, 0.3);
+            box-shadow: 0 0 30px rgba(58, 134, 255, 0.4);
         }
-        
+
         h1 {
-            background: linear-gradient(135deg, var(--primary), var(--accent));
+            background: var(--gradient);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            margin-bottom: 10px;
+            margin-bottom: 1rem;
             font-size: 2.5rem;
+            font-weight: 900;
         }
-        
-        .subtitle {
+
+        p {
             color: var(--gray);
-            margin-bottom: 30px;
+            margin-bottom: 2.5rem;
             font-size: 1.1rem;
         }
-        
+
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 2rem;
             text-align: left;
         }
-        
+
         label {
             display: block;
-            margin-bottom: 8px;
-            color: var(--light);
+            margin-bottom: 0.8rem;
             font-weight: 600;
+            color: var(--light);
         }
-        
-        .input-group {
+
+        .input-container {
             position: relative;
+            margin-bottom: 1.5rem;
         }
-        
-        .input-group i {
+
+        .input-container i {
             position: absolute;
-            left: 15px;
+            left: 20px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--gray);
+            font-size: 1.2rem;
         }
-        
-        input {
+
+        input[type="text"] {
             width: 100%;
-            padding: 15px 15px 15px 45px;
-            background: rgba(255, 255, 255, 0.07);
+            padding: 18px 20px 18px 55px;
             border: 2px solid rgba(58, 134, 255, 0.3);
-            border-radius: 10px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.07);
             color: var(--light);
-            font-size: 1rem;
-            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            transition: var(--transition);
         }
-        
-        input:focus {
+
+        input[type="text"]:focus {
             outline: none;
             border-color: var(--primary);
-            background: rgba(255, 255, 255, 0.1);
             box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.2);
         }
-        
-        .error {
-            color: #ff6b6b;
-            font-size: 0.9rem;
-            margin-top: 5px;
-            display: none;
-        }
-        
+
         .btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background: var(--gradient);
             color: white;
+            padding: 18px;
             border: none;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            font-weight: 600;
+            border-radius: 15px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            width: 100%;
+            transition: var(--transition);
+            box-shadow: 0 5px 20px rgba(58, 134, 255, 0.3);
+            margin-bottom: 1.5rem;
         }
-        
+
         .btn:hover:not(:disabled) {
             transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(58, 134, 255, 0.4);
+            box-shadow: 0 10px 30px rgba(58, 134, 255, 0.4);
         }
-        
+
         .btn:disabled {
             opacity: 0.7;
             cursor: not-allowed;
         }
-        
-        .loader {
+
+        #loading-spinner {
             display: none;
+            margin: 2rem auto;
+        }
+
+        .spinner {
             width: 50px;
             height: 50px;
-            margin: 30px auto;
             border: 4px solid rgba(58, 134, 255, 0.2);
             border-top: 4px solid var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-        
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
-        .result {
-            display: none;
-            margin-top: 30px;
-            padding: 25px;
-            background: rgba(58, 134, 255, 0.1);
+
+        #result {
+            margin-top: 2rem;
+            padding: 2rem;
             border-radius: 15px;
+            display: none;
+            background: rgba(58, 134, 255, 0.1);
             border-left: 4px solid var(--primary);
-            animation: fadeIn 0.5s ease;
         }
-        
-        .code {
+
+        #pair-code {
             font-size: 2rem;
             font-weight: 800;
             color: var(--primary);
-            margin: 15px 0;
-            letter-spacing: 3px;
+            margin: 1.5rem 0;
+            letter-spacing: 2px;
             font-family: 'Courier New', monospace;
-            text-shadow: 0 0 10px rgba(58, 134, 255, 0.3);
-            padding: 15px;
+            padding: 1rem;
             background: rgba(0, 0, 0, 0.2);
             border-radius: 10px;
         }
-        
-        .instructions {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            text-align: left;
-        }
-        
-        .instructions h3 {
-            color: var(--light);
-            margin-bottom: 10px;
-        }
-        
-        .instructions ol {
-            padding-left: 20px;
-            color: var(--gray);
-        }
-        
-        .instructions li {
-            margin-bottom: 8px;
-        }
-        
+
         .action-buttons {
             display: flex;
-            gap: 15px;
-            margin-top: 20px;
+            gap: 1.2rem;
+            margin-top: 2rem;
         }
-        
+
         .action-btn {
             flex: 1;
-            padding: 12px;
-            border-radius: 8px;
-            border: none;
-            font-weight: 600;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: var(--transition);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 0.8rem;
+            border: none;
         }
-        
+
         .copy-btn {
             background: var(--primary);
             color: white;
         }
-        
+
         .copy-btn:hover {
             background: var(--secondary);
         }
-        
+
         .new-btn {
             background: transparent;
             color: var(--primary);
             border: 2px solid var(--primary);
         }
-        
+
         .new-btn:hover {
             background: rgba(58, 134, 255, 0.1);
         }
-        
-        .success {
+
+        .error-message {
+            color: #ff4757;
+            margin-top: 0.8rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .success-message {
             color: var(--accent);
-            margin-top: 15px;
+            margin-top: 1.5rem;
+            display: none;
             font-weight: 600;
-            display: none;
-            animation: fadeIn 0.3s ease;
         }
-        
-        .connected {
-            display: none;
-            background: rgba(6, 214, 160, 0.1);
-            padding: 25px;
-            border-radius: 15px;
-            margin-top: 30px;
-            border: 2px solid var(--accent);
-            animation: fadeIn 0.5s ease;
-        }
-        
-        .connected i {
-            font-size: 3rem;
-            color: var(--accent);
-            margin-bottom: 15px;
-        }
-        
+
         @media (max-width: 768px) {
             .container {
-                padding: 30px 20px;
-            }
-            
-            h1 {
-                font-size: 2rem;
+                padding: 2rem;
             }
             
             .action-buttons {
                 flex-direction: column;
             }
             
-            .back-btn {
-                top: 10px;
-                left: 10px;
-                padding: 8px 15px;
-                font-size: 0.9rem;
+            .home-btn {
+                top: 1rem;
+                right: 1rem;
+                padding: 0.7rem 1.5rem;
             }
         }
     </style>
 </head>
 <body>
-    <a href="/" class="back-btn">
+    <a href="/" class="home-btn">
         <i class="fas fa-arrow-left"></i> Back to Home
     </a>
     
@@ -334,194 +295,163 @@
             <img src="https://files.catbox.moe/52699c.jpg" alt="CLOUD AI">
         </div>
         
-        <h1>CLOUD AI</h1>
-        <p class="subtitle">Enter your WhatsApp number to generate a pairing code</p>
+        <h1>CLOUD AI PAIR CODE</h1>
+        <p>Enter your WhatsApp number to generate a pairing code</p>
         
         <div class="form-group">
-            <label for="phone">📱 WhatsApp Number</label>
-            <div class="input-group">
+            <label for="phone-number">📱 WhatsApp Number</label>
+            <div class="input-container">
                 <i class="fas fa-phone"></i>
-                <input type="tel" id="phone" placeholder="Example: 254712345678" maxlength="15">
+                <input type="text" id="phone-number" 
+                       placeholder="Example: 254712345678" 
+                       maxlength="15">
             </div>
-            <div class="error" id="error">Please enter a valid 10-15 digit phone number</div>
+            <div class="error-message" id="error-message">
+                Please enter a valid 10-15 digit phone number
+            </div>
         </div>
         
-        <button class="btn" id="generateBtn">
-            <span id="btnText">Generate Pairing Code</span>
-            <i class="fas fa-spinner fa-spin" id="btnSpinner" style="display: none;"></i>
+        <button id="submit" class="btn">
+            <span id="btn-text">Generate Pairing Code</span>
+            <span id="btn-spinner" style="display: none;">
+                <i class="fas fa-spinner fa-spin"></i>
+            </span>
         </button>
         
-        <div class="loader" id="loader"></div>
+        <div id="loading-spinner" class="spinner"></div>
         
-        <div class="result" id="result">
+        <div id="result">
             <h3>🔑 Your Pairing Code</h3>
-            <div class="code" id="pairCode"></div>
-            <p style="color: var(--gray); margin: 15px 0;">This code will expire in a few minutes</p>
-            
-            <div class="instructions">
-                <h3>📝 How to Use:</h3>
-                <ol>
-                    <li>Open WhatsApp on your phone</li>
-                    <li>Go to Settings → Linked Devices</li>
-                    <li>Tap on "Link a Device"</li>
-                    <li>Enter the code above when prompted</li>
-                    <li>Wait for connection confirmation</li>
-                </ol>
-            </div>
+            <div id="pair-code"></div>
+            <p style="color: var(--gray); margin: 1.5rem 0;">
+                Enter this code in WhatsApp Linked Devices
+            </p>
             
             <div class="action-buttons">
-                <button class="action-btn copy-btn" id="copyBtn">
+                <button id="copy-btn" class="action-btn copy-btn">
                     <i class="fas fa-copy"></i> Copy Code
                 </button>
-                <button class="action-btn new-btn" id="newBtn">
+                <button id="new-btn" class="action-btn new-btn">
                     <i class="fas fa-redo"></i> New Code
                 </button>
             </div>
             
-            <div class="success" id="success">
+            <div class="success-message" id="success-message">
                 <i class="fas fa-check-circle"></i> Code copied to clipboard!
             </div>
         </div>
-        
-        <div class="connected" id="connected">
-            <i class="fas fa-check-circle"></i>
-            <h3>✅ Connected Successfully!</h3>
-            <p style="color: var(--gray); margin: 10px 0;">
-                Cloud AI bot is now connected to your WhatsApp.<br>
-                You can start using commands with prefix <strong>.</strong>
-            </p>
-            <p style="color: var(--accent); font-weight: 600; margin-top: 15px;">
-                Try: <code>.ping</code> to test the bot
-            </p>
-        </div>
     </div>
-          <script>
-    // DOM Elements
-    const elements = {
-        submit: document.getElementById('submit'),
-        phoneNumber: document.getElementById('phone-number'),
-        result: document.getElementById('result'),
-        pairCode: document.getElementById('pair-code'),
-        copyBtn: document.getElementById('copy-btn'),
-        newBtn: document.getElementById('new-btn'),
-        errorMessage: document.getElementById('error-message'),
-        successMessage: document.getElementById('success-message'),
-        loadingSpinner: document.getElementById('loading-spinner'),
-        connectionSuccess: document.getElementById('connection-success'),
-        btnText: document.getElementById('btn-text'),
-        btnSpinner: document.getElementById('btn-spinner')
-    };
 
-    // Validation
-    function validatePhoneNumber(number) {
-        const cleaned = number.replace(/\s/g, '').replace(/\D/g, '');
-        return cleaned.length >= 10 && cleaned.length <= 15;
-    }
+    <script>
+        // DOM Elements
+        const submitButton = document.getElementById('submit');
+        const phoneInput = document.getElementById('phone-number');
+        const resultDiv = document.getElementById('result');
+        const pairCodeDiv = document.getElementById('pair-code');
+        const copyButton = document.getElementById('copy-btn');
+        const newButton = document.getElementById('new-btn');
+        const errorMessage = document.getElementById('error-message');
+        const successMessage = document.getElementById('success-message');
+        const btnText = document.getElementById('btn-text');
+        const btnSpinner = document.getElementById('btn-spinner');
+        const loadingSpinner = document.getElementById('loading-spinner');
 
-    // Format phone number
-    function formatPhoneNumber(input) {
-        let value = input.replace(/\D/g, '');
-        return value;
-    }
-
-    // Event Listeners
-    elements.phoneNumber.addEventListener('input', (e) => {
-        e.target.value = formatPhoneNumber(e.target.value);
-        if (elements.errorMessage.style.display === 'block') {
-            elements.errorMessage.style.display = 'none';
+        // Validate phone number
+        function validatePhoneNumber(number) {
+            const cleaned = number.replace(/\D/g, '');
+            return cleaned.length >= 10 && cleaned.length <= 15;
         }
-    });
 
-    elements.submit.addEventListener('click', async () => {
-        const phoneNumber = elements.phoneNumber.value;
-        
-        if (!validatePhoneNumber(phoneNumber)) {
-            elements.errorMessage.style.display = 'block';
-            elements.errorMessage.style.animation = 'shake 0.5s';
-            setTimeout(() => {
-                elements.errorMessage.style.animation = '';
-            }, 500);
-            return;
-        }
-        
-        // Show loading
-        elements.btnText.style.display = 'none';
-        elements.btnSpinner.style.display = 'inline-block';
-        elements.submit.disabled = true;
-        elements.loadingSpinner.style.display = 'block';
-        
-        try {
-            // Use the correct endpoint (/code instead of /pair)
-            const response = await fetch(`/code?number=${encodeURIComponent(phoneNumber)}`);
-            const data = await response.json();
+        // Format phone number input
+        phoneInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            e.target.value = value;
+            errorMessage.style.display = 'none';
+        });
+
+        // Handle generate button click
+        submitButton.addEventListener('click', async function() {
+            const phoneNumber = phoneInput.value;
             
-            if (data.success) {
-                // Show pairing code
-                elements.pairCode.textContent = data.code;
-                elements.result.style.display = 'block';
-                elements.result.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                
-                // Show connection success after delay
-                setTimeout(() => {
-                    elements.result.style.display = 'none';
-                    elements.connectionSuccess.style.display = 'block';
-                    elements.connectionSuccess.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    
-                    // Redirect to home after 5 seconds
-                    setTimeout(() => {
-                        window.location.href = '/';
-                    }, 5000);
-                }, 10000);
-            } else {
-                elements.pairCode.textContent = "ERROR: " + (data.message || data.code || "Unknown error");
-                elements.result.style.display = 'block';
+            // Validate
+            if (!validatePhoneNumber(phoneNumber)) {
+                errorMessage.style.display = 'block';
+                return;
             }
-        } catch (error) {
-            console.error("Request failed:", error);
-            elements.pairCode.textContent = "SERVICE UNAVAILABLE - Please try again";
-            elements.result.style.display = 'block';
-        } finally {
-            // Reset loading state
-            elements.btnText.style.display = 'inline-block';
-            elements.btnSpinner.style.display = 'none';
-            elements.submit.disabled = false;
-            elements.loadingSpinner.style.display = 'none';
-        }
-    });
-
-    elements.copyBtn.addEventListener('click', () => {
-        const code = elements.pairCode.textContent;
-        if (code && !code.startsWith("ERROR:") && code !== "SERVICE UNAVAILABLE") {
-            navigator.clipboard.writeText(code).then(() => {
-                elements.successMessage.style.display = 'block';
-                setTimeout(() => {
-                    elements.successMessage.style.display = 'none';
-                }, 3000);
-            });
-        }
-    });
-
-    elements.newBtn.addEventListener('click', () => {
-        elements.result.style.display = 'none';
-        elements.connectionSuccess.style.display = 'none';
-        elements.phoneNumber.value = '';
-        elements.phoneNumber.focus();
-    });
-
-    // Auto-focus on input
-    window.addEventListener('load', () => {
-        elements.phoneNumber.focus();
-    });
-
-    // Enter key support
-    elements.phoneNumber.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            elements.submit.click();
-        }
-    });
-</script>              
+            
+            // Show loading state
+            btnText.style.display = 'none';
+            btnSpinner.style.display = 'inline-block';
+            submitButton.disabled = true;
+            loadingSpinner.style.display = 'block';
+            
+            try {
+                console.log('Sending request for number:', phoneNumber);
                 
+                // Make the API call - using /code endpoint
+                const response = await fetch(`/code?number=${encodeURIComponent(phoneNumber)}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Response received:', data);
+                
+                if (data.success && data.code) {
+                    // Show success
+                    pairCodeDiv.textContent = data.code;
+                    resultDiv.style.display = 'block';
+                    resultDiv.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    // Show error
+                    pairCodeDiv.textContent = 'ERROR: ' + (data.message || 'Failed to generate code');
+                    resultDiv.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                pairCodeDiv.textContent = 'SERVICE ERROR: ' + error.message;
+                resultDiv.style.display = 'block';
+            } finally {
+                // Reset button state
+                btnText.style.display = 'inline-block';
+                btnSpinner.style.display = 'none';
+                submitButton.disabled = false;
+                loadingSpinner.style.display = 'none';
+            }
+        });
+
+        // Handle copy button
+        copyButton.addEventListener('click', function() {
+            const code = pairCodeDiv.textContent;
+            if (code && !code.startsWith('ERROR')) {
+                navigator.clipboard.writeText(code).then(() => {
+                    successMessage.style.display = 'block';
+                    setTimeout(() => {
+                        successMessage.style.display = 'none';
+                    }, 3000);
+                });
+            }
+        });
+
+        // Handle new button
+        newButton.addEventListener('click', function() {
+            resultDiv.style.display = 'none';
+            phoneInput.value = '';
+            phoneInput.focus();
+        });
+
+        // Enter key support
+        phoneInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                submitButton.click();
+            }
+        });
+
+        // Focus on input on load
+        window.addEventListener('load', function() {
+            phoneInput.focus();
+        });
+    </script>
 </body>
 </html>
-
-
