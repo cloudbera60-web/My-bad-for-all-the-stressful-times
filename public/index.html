@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CLOUD AI | WHATSAPP BOT</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLOUD AI | WhatsApp Bot</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -14,1008 +14,532 @@
             --darker: #070f1a;
             --light: #e0e1dd;
             --gray: #8d99ae;
-            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --gradient: linear-gradient(135deg, #3a86ff 0%, #4361ee 50%, #06d6a0 100%);
         }
-
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--dark);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: var(--dark);
             color: var(--light);
-            overflow-x: hidden;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(58, 134, 255, 0.15) 0%, transparent 25%),
-                radial-gradient(circle at 90% 80%, rgba(6, 214, 160, 0.15) 0%, transparent 25%);
-            animation: gradientPulse 20s ease infinite;
+            line-height: 1.6;
         }
-
-        @keyframes gradientPulse {
-            0%, 100% { background-position: 10% 20%, 90% 80%; }
-            50% { background-position: 15% 25%, 85% 75%; }
-        }
-
+        
         .navbar {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            padding: 1.2rem 2rem;
             background: rgba(13, 27, 42, 0.95);
-            backdrop-filter: blur(15px);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            position: fixed;
+            width: 100%;
+            top: 0;
             z-index: 1000;
-            box-shadow: var(--shadow);
             border-bottom: 1px solid rgba(58, 134, 255, 0.2);
         }
-
-        .navbar-container {
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
         }
-
+        
         .logo {
             display: flex;
             align-items: center;
-            gap: 0.8rem;
+            gap: 10px;
             text-decoration: none;
         }
-
-        .logo-icon {
-            font-size: 1.8rem;
+        
+        .logo i {
             color: var(--primary);
-            animation: float 3s ease-in-out infinite;
+            font-size: 1.8rem;
         }
-
-        .logo-text {
-            font-size: 1.6rem;
+        
+        .logo span {
+            font-size: 1.5rem;
             font-weight: 800;
-            background: var(--gradient);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            letter-spacing: 0.5px;
         }
-
-        .menu {
+        
+        .nav-links {
             display: flex;
-            gap: 1.5rem;
+            gap: 2rem;
+            align-items: center;
         }
-
-        .menu-link {
+        
+        .nav-link {
             color: var(--light);
             text-decoration: none;
             font-weight: 600;
-            position: relative;
-            padding: 0.5rem 0;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            font-size: 0.95rem;
-            transition: var(--transition);
+            gap: 8px;
+            transition: all 0.3s ease;
         }
-
-        .menu-link::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: 0;
-            left: 0;
-            background: var(--gradient);
-            transition: var(--transition);
-        }
-
-        .menu-link:hover::after {
-            width: 100%;
-        }
-
-        .menu-link:hover {
+        
+        .nav-link:hover {
             color: var(--primary);
         }
-
-        .menu-link i {
-            font-size: 1rem;
-        }
-
-        .menu-toggle {
-            display: none;
-            background: none;
-            border: none;
-            color: var(--light);
-            font-size: 1.5rem;
-            cursor: pointer;
-            z-index: 1001;
-        }
-
+        
         .hero {
-            padding: 12rem 2rem 6rem;
+            padding: 150px 2rem 100px;
             text-align: center;
-            position: relative;
-            overflow: hidden;
+            background: linear-gradient(135deg, rgba(13, 27, 42, 0.9), rgba(27, 38, 59, 0.9));
         }
-
-        .hero-content {
-            max-width: 900px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-        }
-
-        .hero-title {
-            font-size: 4rem;
+        
+        .hero h1 {
+            font-size: 3.5rem;
             margin-bottom: 1.5rem;
-            background: var(--gradient);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            line-height: 1.1;
-            opacity: 0;
-            transform: translateY(30px);
-            animation: fadeInUp 1s ease-out forwards;
-            font-weight: 900;
-            letter-spacing: -0.5px;
         }
-
-        .hero-subtitle {
-            font-size: 1.4rem;
+        
+        .hero p {
+            font-size: 1.2rem;
             color: var(--gray);
-            margin-bottom: 3rem;
-            max-width: 700px;
-            margin-left: auto;
-            margin-right: auto;
-            line-height: 1.6;
-            opacity: 0;
-            transform: translateY(30px);
-            animation: fadeInUp 1s ease-out 0.3s forwards;
+            max-width: 800px;
+            margin: 0 auto 2.5rem;
         }
-
-        .hero-buttons {
+        
+        .btn-group {
             display: flex;
-            gap: 1.2rem;
+            gap: 1rem;
             justify-content: center;
-            margin-top: 3rem;
             flex-wrap: wrap;
-            opacity: 0;
-            transform: translateY(30px);
-            animation: fadeInUp 1s ease-out 0.6s forwards;
         }
-
+        
         .btn {
-            padding: 1rem 2.5rem;
-            border-radius: 50px;
-            font-weight: 700;
+            padding: 12px 30px;
+            border-radius: 25px;
             text-decoration: none;
+            font-weight: 600;
             display: inline-flex;
             align-items: center;
-            gap: 0.8rem;
-            transition: var(--transition);
-            box-shadow: var(--shadow);
-            font-size: 1rem;
-            position: relative;
-            overflow: hidden;
+            gap: 10px;
+            transition: all 0.3s ease;
         }
-
+        
         .btn-primary {
-            background: var(--gradient);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
         }
-
-        .btn-primary:hover {
-            transform: translateY(-5px) scale(1.05);
-            box-shadow: 0 15px 35px rgba(58, 134, 255, 0.4);
-        }
-
+        
         .btn-secondary {
             background: rgba(255, 255, 255, 0.1);
             color: var(--light);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-5px);
-            border-color: rgba(58, 134, 255, 0.3);
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(58, 134, 255, 0.3);
         }
-
+        
         .features {
-            padding: 6rem 2rem;
+            padding: 100px 2rem;
             max-width: 1200px;
             margin: 0 auto;
         }
-
+        
         .section-title {
             text-align: center;
-            font-size: 3rem;
-            margin-bottom: 4rem;
-            background: var(--gradient);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            opacity: 0;
-            transform: translateY(30px);
-            animation: fadeInUp 1s ease-out forwards;
-            font-weight: 900;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: var(--light);
         }
-
+        
         .features-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2.5rem;
-        }
-
-        .feature-card {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 2.5rem;
-            text-align: center;
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(58, 134, 255, 0.15);
-            opacity: 0;
-            transform: translateY(30px);
-            animation: fadeInUp 0.8s ease-out forwards;
-            transition: var(--transition);
-        }
-
-        .feature-card:nth-child(1) { animation-delay: 0.2s; }
-        .feature-card:nth-child(2) { animation-delay: 0.4s; }
-        .feature-card:nth-child(3) { animation-delay: 0.6s; }
-        .feature-card:nth-child(4) { animation-delay: 0.8s; }
-        .feature-card:nth-child(5) { animation-delay: 1s; }
-
-        .feature-card:hover {
-            transform: translateY(-15px) scale(1.02);
-            box-shadow: 0 25px 50px rgba(58, 134, 255, 0.25);
-            border-color: rgba(58, 134, 255, 0.4);
-        }
-
-        .feature-icon {
-            font-size: 3.5rem;
-            margin-bottom: 2rem;
-            color: var(--primary);
-            display: inline-block;
-            animation: iconFloat 3s ease-in-out infinite;
-        }
-
-        .feature-title {
-            font-size: 1.8rem;
-            margin-bottom: 1.2rem;
-            color: var(--light);
-            font-weight: 700;
-        }
-
-        .feature-description {
-            color: var(--gray);
-            font-size: 1.1rem;
-            line-height: 1.7;
-        }
-
-        .commands {
-            padding: 6rem 2rem;
-            background: rgba(13, 27, 42, 0.7);
-            margin: 3rem 0;
-            border-top: 1px solid rgba(58, 134, 255, 0.2);
-            border-bottom: 1px solid rgba(58, 134, 255, 0.2);
-        }
-
-        .commands-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 2rem;
+        }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 1px solid rgba(58, 134, 255, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            background: rgba(58, 134, 255, 0.1);
+            border-color: var(--primary);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .feature-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--light);
+        }
+        
+        .feature-desc {
+            color: var(--gray);
+        }
+        
+        .commands {
+            padding: 100px 2rem;
+            background: rgba(13, 27, 42, 0.7);
+        }
+        
+        .commands-grid {
             max-width: 1200px;
             margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
         }
-
+        
         .command-card {
-            background: var(--card-bg);
-            border-radius: 15px;
-            padding: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 10px;
             border-left: 4px solid var(--accent);
-            transition: var(--transition);
         }
-
-        .command-card:hover {
-            transform: translateY(-5px);
-            background: rgba(58, 134, 255, 0.1);
-        }
-
-        .command-prefix {
-            font-weight: 700;
-            color: var(--accent);
-            font-size: 1.2rem;
+        
+        .command-name {
+            color: var(--primary);
+            font-weight: 600;
             margin-bottom: 0.5rem;
         }
-
+        
         .command-desc {
             color: var(--gray);
-            line-height: 1.6;
+            font-size: 0.9rem;
         }
-
+        
         .cta {
-            padding: 6rem 2rem;
+            padding: 100px 2rem;
             text-align: center;
-            background: rgba(58, 134, 255, 0.1);
-            margin: 3rem 0;
-            position: relative;
-            overflow: hidden;
+            background: linear-gradient(135deg, rgba(58, 134, 255, 0.1), rgba(6, 214, 160, 0.1));
         }
-
-        .cta::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: var(--gradient);
-            opacity: 0.1;
-            z-index: -1;
-        }
-
-        .cta-content {
-            max-width: 800px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-        }
-
-        .cta-title {
-            font-size: 2.8rem;
-            margin-bottom: 2rem;
+        
+        .cta h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
             color: var(--light);
-            font-weight: 900;
         }
-
-        .cta-text {
+        
+        .cta p {
             color: var(--gray);
-            margin-bottom: 3rem;
-            font-size: 1.2rem;
-            line-height: 1.8;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            font-size: 1.1rem;
         }
-
+        
         footer {
             background: var(--darker);
-            padding: 4rem 2rem 2rem;
-            margin-top: auto;
+            padding: 3rem 2rem;
             border-top: 1px solid rgba(58, 134, 255, 0.2);
         }
-
+        
         .footer-content {
             max-width: 1200px;
             margin: 0 auto;
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 3rem;
+            gap: 2rem;
         }
-
+        
         .footer-logo {
             display: flex;
             align-items: center;
-            gap: 0.8rem;
-            margin-bottom: 1.5rem;
-            text-decoration: none;
+            gap: 10px;
+            margin-bottom: 1rem;
         }
-
-        .footer-logo-icon {
-            font-size: 2rem;
+        
+        .footer-logo i {
             color: var(--primary);
+            font-size: 1.5rem;
         }
-
-        .footer-logo-text {
-            font-size: 1.8rem;
+        
+        .footer-logo span {
+            font-size: 1.3rem;
             font-weight: 800;
-            background: var(--gradient);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
         }
-
-        .footer-description {
+        
+        .footer-desc {
             color: var(--gray);
-            margin-bottom: 2rem;
-            line-height: 1.7;
-            font-size: 1rem;
+            margin-bottom: 1.5rem;
         }
-
-        .footer-links {
+        
+        .social-links {
             display: flex;
-            gap: 1.2rem;
+            gap: 1rem;
         }
-
-        .footer-link {
+        
+        .social-link {
             color: var(--gray);
-            font-size: 1.3rem;
-            transition: var(--transition);
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.05);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
         }
-
-        .footer-link:hover {
+        
+        .social-link:hover {
             color: var(--primary);
-            background: rgba(58, 134, 255, 0.1);
-            transform: translateY(-3px);
         }
-
+        
         .footer-column h3 {
             color: var(--light);
-            margin-bottom: 1.8rem;
-            font-size: 1.3rem;
-            position: relative;
-            padding-bottom: 0.8rem;
-            font-weight: 700;
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
         }
-
-        .footer-column h3::after {
-            content: '';
-            position: absolute;
-            width: 50px;
-            height: 3px;
-            bottom: 0;
-            left: 0;
-            background: var(--gradient);
-            border-radius: 3px;
-        }
-
-        .footer-menu {
+        
+        .footer-links {
             list-style: none;
         }
-
-        .footer-menu-item {
-            margin-bottom: 1rem;
+        
+        .footer-links li {
+            margin-bottom: 0.8rem;
         }
-
-        .footer-menu-link {
+        
+        .footer-links a {
             color: var(--gray);
             text-decoration: none;
-            transition: var(--transition);
             display: flex;
             align-items: center;
-            gap: 0.8rem;
-            font-size: 1rem;
+            gap: 8px;
+            transition: all 0.3s ease;
         }
-
-        .footer-menu-link:hover {
+        
+        .footer-links a:hover {
             color: var(--primary);
-            padding-left: 10px;
+            padding-left: 5px;
         }
-
-        .footer-menu-link i {
-            font-size: 0.9rem;
-            width: 20px;
-        }
-
+        
         .copyright {
             text-align: center;
-            margin-top: 4rem;
+            margin-top: 3rem;
             padding-top: 2rem;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             color: var(--gray);
             font-size: 0.9rem;
         }
-
+        
         .copyright a {
             color: var(--primary);
             text-decoration: none;
-            font-weight: 700;
         }
-
-        @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        @keyframes iconFloat {
-            0%, 100% { transform: translateY(0) rotate(0); }
-            50% { transform: translateY(-5px) rotate(5deg); }
-        }
-
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            overflow: hidden;
-        }
-
-        .particle {
-            position: absolute;
-            background: rgba(58, 134, 255, 0.2);
-            border-radius: 50%;
-            animation: floatParticle linear infinite;
-        }
-
-        @keyframes floatParticle {
-            0% {
-                transform: translateY(100vh) rotate(0deg);
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100px) rotate(360deg);
-                opacity: 0;
-            }
-        }
-
-        /* Responsive */
+        
         @media (max-width: 768px) {
-            .menu {
-                position: fixed;
-                top: 0;
-                left: -100%;
-                width: 85%;
-                height: 100vh;
-                background: var(--darker);
-                flex-direction: column;
-                align-items: flex-start;
-                justify-content: flex-start;
-                padding: 6rem 2rem 2rem;
-                gap: 2rem;
-                z-index: 1000;
-                transition: var(--transition);
-                box-shadow: 5px 0 30px rgba(0, 0, 0, 0.3);
+            .nav-links {
+                display: none;
             }
-
-            .menu.active {
-                left: 0;
+            
+            .hero h1 {
+                font-size: 2.5rem;
             }
-
-            .menu-toggle {
-                display: block;
-            }
-
-            .hero {
-                padding: 10rem 1.5rem 4rem;
-            }
-
-            .hero-title {
-                font-size: 2.8rem;
-            }
-
-            .hero-subtitle {
-                font-size: 1.2rem;
-            }
-
-            .hero-buttons {
+            
+            .btn-group {
                 flex-direction: column;
                 align-items: center;
             }
-
+            
             .btn {
                 width: 100%;
                 max-width: 300px;
                 justify-content: center;
             }
-
-            .section-title {
-                font-size: 2.2rem;
-            }
-
-            .feature-card {
-                padding: 2rem;
-            }
-
-            .footer-content {
-                grid-template-columns: 1fr;
-                gap: 2.5rem;
-            }
-        }
-
-        /* Right click protection */
-        #rightClickMessage {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(13, 27, 42, 0.95);
-            color: var(--accent);
-            padding: 1.5rem 2.5rem;
-            border-radius: 10px;
-            box-shadow: 0 0 40px rgba(58, 134, 255, 0.3);
-            z-index: 9999;
-            font-size: 1.1rem;
-            text-align: center;
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--primary);
-            font-weight: 600;
         }
     </style>
 </head>
 <body>
-    <div class="particles" id="particles"></div>
-    
     <!-- Navigation -->
     <nav class="navbar">
-        <div class="navbar-container">
-            <a href="#" class="logo">
-                <i class="fas fa-cloud logo-icon"></i>
-                <span class="logo-text">CLOUD AI</span>
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <i class="fas fa-cloud"></i>
+                <span>CLOUD AI</span>
             </a>
-            
-            <button class="menu-toggle" id="menuToggle">
-                <i class="fas fa-bars"></i>
-            </button>
-            
-            <div class="menu" id="menu">
-                <a href="https://github.com/mauricegift/cloud-ai" class="menu-link" target="_blank">
-                    <i class="fab fa-github"></i> Source Code
+            <div class="nav-links">
+                <a href="/" class="nav-link">
+                    <i class="fas fa-home"></i> Home
                 </a>
-                <a href="./pair" class="menu-link">
+                <a href="/pair" class="nav-link">
                     <i class="fas fa-link"></i> Pair Code
                 </a>
-                <a href="./qr" class="menu-link">
+                <a href="/qr" class="nav-link">
                     <i class="fas fa-qrcode"></i> QR Code
                 </a>
-                <a href="https://t.me/mouricedevs" class="menu-link" target="_blank">
-                    <i class="fab fa-telegram"></i> Support
+                <a href="https://github.com/mauricegift/cloud-ai" target="_blank" class="nav-link">
+                    <i class="fab fa-github"></i> GitHub
                 </a>
-                <a href="#commands" class="menu-link">
-                    <i class="fas fa-code"></i> Commands
+                <a href="https://t.me/mouricedevs" target="_blank" class="nav-link">
+                    <i class="fab fa-telegram"></i> Support
                 </a>
             </div>
         </div>
     </nav>
-
+    
     <!-- Hero Section -->
     <section class="hero">
-        <div class="hero-content">
-            <h1 class="hero-title">CLOUD AI WhatsApp Bot</h1>
-            <p class="hero-subtitle">
-                Advanced AI-powered WhatsApp automation with cutting-edge features, 
-                intelligent responses, and seamless integration for enhanced productivity.
-            </p>
-            <div class="hero-buttons">
-                <a href="./pair" class="btn btn-primary">
-                    <i class="fas fa-link"></i> Connect with Pair Code
-                </a>
-                <a href="./qr" class="btn btn-secondary">
-                    <i class="fas fa-qrcode"></i> Scan QR Code
-                </a>
-                <a href="https://github.com/mauricegift/cloud-ai" class="btn btn-secondary" target="_blank">
-                    <i class="fab fa-github"></i> View on GitHub
-                </a>
-            </div>
+        <h1>CLOUD AI WhatsApp Bot</h1>
+        <p>Advanced AI-powered WhatsApp automation with cutting-edge features, intelligent responses, and seamless integration for enhanced productivity.</p>
+        <div class="btn-group">
+            <a href="/pair" class="btn btn-primary">
+                <i class="fas fa-link"></i> Connect with Pair Code
+            </a>
+            <a href="/qr" class="btn btn-secondary">
+                <i class="fas fa-qrcode"></i> Scan QR Code
+            </a>
+            <a href="https://github.com/mauricegift/cloud-ai" target="_blank" class="btn btn-secondary">
+                <i class="fab fa-github"></i> View on GitHub
+            </a>
         </div>
     </section>
-
+    
     <!-- Features Section -->
     <section class="features">
         <h2 class="section-title">Powerful Features</h2>
         <div class="features-grid">
-            <div class="feature-card" onclick="window.open('./pair', '_self')">
+            <div class="feature-card" onclick="window.location.href='/pair'">
                 <div class="feature-icon">
                     <i class="fas fa-link"></i>
                 </div>
                 <h3 class="feature-title">Pair Code Login</h3>
-                <p class="feature-description">
-                    Connect instantly using pair codes. No QR scanning needed. 
-                    Just enter the code in WhatsApp linked devices section.
-                </p>
+                <p class="feature-desc">Connect instantly using pair codes. No QR scanning needed. Just enter the code in WhatsApp linked devices.</p>
             </div>
-            
-            <div class="feature-card" onclick="window.open('./qr', '_self')">
+            <div class="feature-card" onclick="window.location.href='/qr'">
                 <div class="feature-icon">
                     <i class="fas fa-qrcode"></i>
                 </div>
                 <h3 class="feature-title">QR Code Login</h3>
-                <p class="feature-description">
-                    Traditional QR scanning method for quick and secure connection 
-                    to your WhatsApp account.
-                </p>
+                <p class="feature-desc">Traditional QR scanning method for quick and secure connection to your WhatsApp account.</p>
             </div>
-            
             <div class="feature-card" onclick="window.open('https://github.com/mauricegift/cloud-ai', '_blank')">
                 <div class="feature-icon">
                     <i class="fas fa-robot"></i>
                 </div>
                 <h3 class="feature-title">AI Powered</h3>
-                <p class="feature-description">
-                    Intelligent responses, natural language processing, 
-                    and smart automation capabilities powered by AI.
-                </p>
+                <p class="feature-desc">Intelligent responses and smart automation capabilities powered by advanced AI technology.</p>
             </div>
-            
             <div class="feature-card" onclick="window.open('https://t.me/mouricedevs', '_blank')">
                 <div class="feature-icon">
                     <i class="fas fa-headset"></i>
                 </div>
                 <h3 class="feature-title">24/7 Support</h3>
-                <p class="feature-description">
-                    Get dedicated support from our team for setup, 
-                    customization, and troubleshooting.
-                </p>
-            </div>
-            
-            <div class="feature-card" onclick="window.open('https://whatsapp.com/channel/0029Vb3hlgX5kg7G0nFggl0Y', '_blank')">
-                <div class="feature-icon">
-                    <i class="fas fa-sync-alt"></i>
-                </div>
-                <h3 class="feature-title">Regular Updates</h3>
-                <p class="feature-description">
-                    Stay updated with latest features, security patches, 
-                    and improvements through our WhatsApp channel.
-                </p>
+                <p class="feature-desc">Get dedicated support from our team for setup, customization, and troubleshooting.</p>
             </div>
         </div>
     </section>
-
+    
     <!-- Commands Section -->
-    <section class="commands" id="commands">
+    <section class="commands">
         <h2 class="section-title">Available Commands</h2>
         <div class="commands-grid">
             <div class="command-card">
-                <div class="command-prefix">.ping</div>
+                <div class="command-name">.ping</div>
                 <p class="command-desc">Check bot response time and latency</p>
             </div>
             <div class="command-card">
-                <div class="command-prefix">.help</div>
+                <div class="command-name">.help</div>
                 <p class="command-desc">Show all available commands and usage</p>
             </div>
             <div class="command-card">
-                <div class="command-prefix">.sticker</div>
-                <p class="command-desc">Convert images/videos to stickers</p>
+                <div class="command-name">.owner</div>
+                <p class="command-desc">Contact bot owner for support</p>
             </div>
             <div class="command-card">
-                <div class="command-prefix">.tts</div>
+                <div class="command-name">.sticker</div>
+                <p class="command-desc">Convert images to WhatsApp stickers</p>
+            </div>
+            <div class="command-card">
+                <div class="command-name">.tts</div>
                 <p class="command-desc">Convert text to speech audio</p>
             </div>
             <div class="command-card">
-                <div class="command-prefix">.owner</div>
-                <p class="command-desc">Contact bot owner/support</p>
-            </div>
-            <div class="command-card">
-                <div class="command-prefix">.weather</div>
+                <div class="command-name">.weather</div>
                 <p class="command-desc">Get weather information</p>
             </div>
-            <div class="command-card">
-                <div class="command-prefix">.quote</div>
-                <p class="command-desc">Get random inspirational quotes</p>
-            </div>
-            <div class="command-card">
-                <div class="command-prefix">.calc</div>
-                <p class="command-desc">Advanced calculator with expressions</p>
-            </div>
         </div>
     </section>
-
+    
     <!-- CTA Section -->
     <section class="cta">
-        <div class="cta-content">
-            <h2 class="cta-title">Ready to Experience AI-Powered WhatsApp?</h2>
-            <p class="cta-text">
-                Cloud AI transforms your WhatsApp experience with advanced automation, 
-                intelligent responses, and powerful features. Connect now and unleash 
-                the full potential of WhatsApp automation.
-            </p>
-            <div class="hero-buttons">
-                <a href="./pair" class="btn btn-primary">
-                    <i class="fas fa-bolt"></i> Connect Now
-                </a>
-                <a href="https://github.com/mauricegift/cloud-ai" class="btn btn-secondary" target="_blank">
-                    <i class="fab fa-github"></i> Star on GitHub
-                </a>
-            </div>
+        <h2>Ready to Experience AI-Powered WhatsApp?</h2>
+        <p>Cloud AI transforms your WhatsApp experience with advanced automation, intelligent responses, and powerful features. Connect now and unleash the full potential of WhatsApp automation.</p>
+        <div class="btn-group">
+            <a href="/pair" class="btn btn-primary">
+                <i class="fas fa-bolt"></i> Connect Now
+            </a>
+            <a href="https://github.com/mauricegift/cloud-ai" target="_blank" class="btn btn-secondary">
+                <i class="fab fa-github"></i> Star on GitHub
+            </a>
         </div>
     </section>
-
+    
     <!-- Footer -->
     <footer>
         <div class="footer-content">
             <div class="footer-column">
-                <a href="#" class="footer-logo">
-                    <i class="fas fa-cloud footer-logo-icon"></i>
-                    <span class="footer-logo-text">CLOUD AI</span>
-                </a>
-                <p class="footer-description">
-                    Advanced AI-powered WhatsApp automation bot with cutting-edge 
-                    features, intelligent responses, and seamless integration capabilities.
-                </p>
-                <div class="footer-links">
-                    <a href="https://github.com/mauricegift/cloud-ai" class="footer-link" target="_blank">
+                <div class="footer-logo">
+                    <i class="fas fa-cloud"></i>
+                    <span>CLOUD AI</span>
+                </div>
+                <p class="footer-desc">Advanced AI-powered WhatsApp automation bot with cutting-edge features and intelligent responses.</p>
+                <div class="social-links">
+                    <a href="https://github.com/mauricegift/cloud-ai" target="_blank" class="social-link">
                         <i class="fab fa-github"></i>
                     </a>
-                    <a href="https://t.me/mouricedevs" class="footer-link" target="_blank">
+                    <a href="https://t.me/mouricedevs" target="_blank" class="social-link">
                         <i class="fab fa-telegram"></i>
                     </a>
-                    <a href="https://whatsapp.com/channel/0029Vb3hlgX5kg7G0nFggl0Y" class="footer-link" target="_blank">
+                    <a href="https://whatsapp.com/channel/0029Vb3hlgX5kg7G0nFggl0Y" target="_blank" class="social-link">
                         <i class="fab fa-whatsapp"></i>
-                    </a>
-                    <a href="https://youtube.com/@mauricegift" class="footer-link" target="_blank">
-                        <i class="fab fa-youtube"></i>
                     </a>
                 </div>
             </div>
-            
             <div class="footer-column">
                 <h3>Quick Links</h3>
-                <ul class="footer-menu">
-                    <li class="footer-menu-item">
-                        <a href="./pair" class="footer-menu-link">
-                            <i class="fas fa-chevron-right"></i> Pair Code
-                        </a>
-                    </li>
-                    <li class="footer-menu-item">
-                        <a href="./qr" class="footer-menu-link">
-                            <i class="fas fa-chevron-right"></i> QR Code
-                        </a>
-                    </li>
-                    <li class="footer-menu-item">
-                        <a href="#commands" class="footer-menu-link">
-                            <i class="fas fa-chevron-right"></i> Commands
-                        </a>
-                    </li>
-                    <li class="footer-menu-item">
-                        <a href="https://github.com/mauricegift/cloud-ai" class="footer-menu-link" target="_blank">
-                            <i class="fas fa-chevron-right"></i> Documentation
-                        </a>
-                    </li>
+                <ul class="footer-links">
+                    <li><a href="/pair"><i class="fas fa-chevron-right"></i> Pair Code</a></li>
+                    <li><a href="/qr"><i class="fas fa-chevron-right"></i> QR Code</a></li>
+                    <li><a href="https://github.com/mauricegift/cloud-ai" target="_blank"><i class="fas fa-chevron-right"></i> Documentation</a></li>
+                    <li><a href="https://github.com/mauricegift/cloud-ai/issues" target="_blank"><i class="fas fa-chevron-right"></i> Report Issues</a></li>
                 </ul>
             </div>
-            
             <div class="footer-column">
                 <h3>Support</h3>
-                <ul class="footer-menu">
-                    <li class="footer-menu-item">
-                        <a href="https://t.me/mouricedevs" class="footer-menu-link" target="_blank">
-                            <i class="fas fa-chevron-right"></i> Telegram Group
-                        </a>
-                    </li>
-                    <li class="footer-menu-item">
-                        <a href="https://whatsapp.com/channel/0029Vb3hlgX5kg7G0nFggl0Y" class="footer-menu-link" target="_blank">
-                            <i class="fas fa-chevron-right"></i> WhatsApp Channel
-                        </a>
-                    </li>
-                    <li class="footer-menu-item">
-                        <a href="https://github.com/mauricegift/cloud-ai/issues" class="footer-menu-link" target="_blank">
-                            <i class="fas fa-chevron-right"></i> Report Issues
-                        </a>
-                    </li>
-                    <li class="footer-menu-item">
-                        <a href="#" class="footer-menu-link" onclick="alert('Email: mauricegift@proton.me')">
-                            <i class="fas fa-chevron-right"></i> Email Support
-                        </a>
-                    </li>
+                <ul class="footer-links">
+                    <li><a href="https://t.me/mouricedevs" target="_blank"><i class="fas fa-chevron-right"></i> Telegram Group</a></li>
+                    <li><a href="https://whatsapp.com/channel/0029Vb3hlgX5kg7G0nFggl0Y" target="_blank"><i class="fas fa-chevron-right"></i> WhatsApp Channel</a></li>
+                    <li><a href="mailto:mauricegift@proton.me"><i class="fas fa-chevron-right"></i> Email Support</a></li>
                 </ul>
             </div>
         </div>
-        
         <div class="copyright">
             &copy; <span id="currentYear"></span> Made with <i class="fas fa-heart" style="color: #ff4757;"></i> by 
             <a href="https://github.com/mauricegift" target="_blank">Gifted Tech</a> | 
             CLOUD AI v2.0.0
         </div>
     </footer>
-
-    <div id="rightClickMessage">⚠️ Action restricted by CLOUD AI</div>
-
+    
     <script>
-        // Create animated particles
-        function createParticles() {
-            const particlesContainer = document.getElementById('particles');
-            const particleCount = window.innerWidth < 768 ? 20 : 40;
-            
-            particlesContainer.innerHTML = '';
-            
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.classList.add('particle');
-                
-                const size = Math.random() * 100 + 20;
-                particle.style.width = `${size}px`;
-                particle.style.height = `${size}px`;
-                
-                particle.style.left = `${Math.random() * 100}%`;
-                
-                const duration = Math.random() * 20 + 10;
-                particle.style.animationDuration = `${duration}s`;
-                particle.style.animationDelay = `${Math.random() * 5}s`;
-                
-                const opacity = Math.random() * 0.3 + 0.1;
-                particle.style.opacity = opacity;
-                
-                // Random gradient colors
-                const colors = [
-                    'rgba(58, 134, 255, 0.2)',
-                    'rgba(67, 97, 238, 0.2)',
-                    'rgba(6, 214, 160, 0.2)'
-                ];
-                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
-                
-                particlesContainer.appendChild(particle);
-            }
-        }
-        
-        createParticles();
-        
-        // Update particles on resize
-        window.addEventListener('resize', createParticles);
-
-        // Mobile menu toggle
-        const menuToggle = document.getElementById('menuToggle');
-        const menu = document.getElementById('menu');
-
-        menuToggle.addEventListener('click', () => {
-            menu.classList.toggle('active');
-            menuToggle.innerHTML = menu.classList.contains('active') 
-                ? '<i class="fas fa-times"></i>' 
-                : '<i class="fas fa-bars"></i>';
-        });
-
-        // Close menu when clicking links
-        document.querySelectorAll('.menu-link').forEach(link => {
-            link.addEventListener('click', () => {
-                menu.classList.remove('active');
-                menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
-            });
-        });
-
-        // Update copyright year
+        // Set current year in copyright
         document.getElementById('currentYear').textContent = new Date().getFullYear();
-
-        // Scroll animation
-        const animateOnScroll = () => {
-            const elements = document.querySelectorAll('.feature-card, .command-card, .section-title');
-            
-            elements.forEach(element => {
-                const elementPosition = element.getBoundingClientRect().top;
-                const screenPosition = window.innerHeight / 1.2;
-                
-                if (elementPosition < screenPosition) {
-                    element.style.animation = 'fadeInUp 0.8s ease-out forwards';
-                }
-            });
-        };
-
-        window.addEventListener('scroll', animateOnScroll);
-        window.addEventListener('load', animateOnScroll);
-
-        // Right-click protection
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-            const message = document.getElementById('rightClickMessage');
-            message.style.display = 'block';
-            setTimeout(() => {
-                message.style.display = 'none';
-            }, 2000);
-        });
-
-        // Prevent text selection
-        document.addEventListener('selectstart', function(e) {
-            e.preventDefault();
-        });
-
-        // Smooth scroll for anchor links
+        
+        // Smooth scrolling for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -1031,29 +555,6 @@
                 }
             });
         });
-
-        // Add hover effect to cards
-        document.querySelectorAll('.feature-card, .command-card').forEach(card => {
-            card.style.cursor = 'pointer';
-            card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-10px)';
-            });
-            card.addEventListener('mouseleave', function() {
-                if (!this.classList.contains('active')) {
-                    this.style.transform = 'translateY(0)';
-                }
-            });
-        });
-
-        // Auto-play animations on load
-        window.addEventListener('load', () => {
-            document.body.style.opacity = '0';
-            document.body.style.transition = 'opacity 0.5s ease';
-            
-            setTimeout(() => {
-                document.body.style.opacity = '1';
-            }, 100);
-        });
     </script>
 </body>
-    </html>
+</html>
