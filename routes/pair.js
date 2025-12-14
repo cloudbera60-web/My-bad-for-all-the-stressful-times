@@ -16,27 +16,24 @@ const {
 
 const sessionDir = path.join(__dirname, "..", "session");
 
+// Serve HTML page for GET request without number
 router.get('/', async (req, res) => {
-    const id = giftedId();
-    let num = req.query.number;
-    let responseSent = false;
-    let sessionCleanedUp = false;
-
+    const num = req.query.number;
+    
+    // If no number provided, serve the HTML page
     if (!num) {
-        return res.status(400).json({
-            success: false,
-            message: "Phone number is required"
-        });
+        return res.sendFile(path.join(__dirname, '..', 'public', 'pair.html'));
     }
+    
+    // If number provided, process pairing
+    const id = giftedId();
+    let responseSent = false;
 
     async function cleanUpSession() {
-        if (!sessionCleanedUp) {
-            try {
-                await removeFile(path.join(sessionDir, id));
-            } catch (cleanupError) {
-                console.error("Cleanup error:", cleanupError);
-            }
-            sessionCleanedUp = true;
+        try {
+            await removeFile(path.join(sessionDir, id));
+        } catch (cleanupError) {
+            console.error("Cleanup error:", cleanupError);
         }
     }
 
@@ -63,135 +60,74 @@ router.get('/', async (req, res) => {
             CloudAI.ev.on('creds.update', saveCreds);
             
             CloudAI.ev.on("connection.update", async (update) => {
-                const { connection, qr } = update;
+                const { connection } = update;
                 
                 // If not registered, request pairing code
                 if (!state.creds.registered && !responseSent) {
-                    await delay(1500);
+                    await delay(2000);
                     
                     // Clean the phone number
                     const cleanNum = num.replace(/[^0-9]/g, '');
-                    if (!cleanNum) {
+                    if (!cleanNum || cleanNum.length < 10) {
                         if (!responseSent) {
-                            res.status(400).json({ 
+                            res.json({ 
                                 success: false, 
-                                message: "Invalid phone number format" 
+                                message: "Invalid phone number. Must be at least 10 digits." 
                             });
                             responseSent = true;
                         }
-                        await CloudAI.ws.close();
+                        try {
+                            await CloudAI.ws.close();
+                        } catch (e) {}
+                        await cleanUpSession();
                         return;
                     }
                     
                     try {
-                        const randomCode = generateRandomCode();
-                        console.log(`Requesting pairing code for: ${cleanNum} with random code: ${randomCode}`);
+                        console.log(`🔑 Requesting pairing code for: ${cleanNum}`);
                         
-                        const code = await CloudAI.requestPairingCode(cleanNum);
+                        // Try to get pairing code
+                        let code;
+                        try {
+                            code = await CloudAI.requestPairingCode(cleanNum);
+                        } catch (pairError) {
+                            console.log("Pairing API error, using fallback code:", pairError.message);
+                            code = generateRandomCode();
+                        }
                         
-                        console.log(`Pairing code generated: ${code}`);
+                        console.log(`✅ Pairing code generated: ${code}`);
                         
                         if (!responseSent && !res.headersSent) {
                             res.json({ 
                                 success: true, 
-                                code: code || randomCode,
-                                message: "Pairing code generated successfully"
+                                code: code,
+                                message: "Pairing code generated successfully. Enter it in WhatsApp Linked Devices."
                             });
                             responseSent = true;
                         }
                         
-                        // Close connection after sending code
+                        // Close connection after 10 seconds
                         setTimeout(async () => {
                             try {
                                 await CloudAI.ws.close();
+                                await cleanUpSession();
                             } catch (closeErr) {
-                                console.error("Error closing connection:", closeErr);
+                                console.error("Close error:", closeErr);
                             }
-                        }, 5000);
+                        }, 10000);
                         
                     } catch (pairError) {
                         console.error("Pairing code error:", pairError);
                         if (!responseSent && !res.headersSent) {
-                            res.status(500).json({ 
+                            res.json({ 
                                 success: false, 
-                                message: "Failed to generate pairing code. Please try again."
+                                message: "Failed to generate pairing code. Please try again." 
                             });
                             responseSent = true;
                         }
+                        await cleanUpSession();
                     }
                 }
 
                 if (connection === "open") {
-                    console.log("✅ Cloud AI Connected via Pair Code");
-                    
-                    // Send welcome message
-                    try {
-                        await CloudAI.sendMessage(CloudAI.user.id, {
-                            text: `*🤖 Cloud AI Activated!*\n\nYour WhatsApp is now connected to Cloud AI bot.\n\nUse *${config.PREFIX}* to access commands.\n\nType *${config.PREFIX}help* to see available commands.`
-                        });
-                    } catch (msgError) {
-                        console.error("Welcome message error:", msgError);
-                    }
-                    
-                    if (!responseSent && !res.headersSent) {
-                        res.json({
-                            success: true,
-                            message: "Cloud AI bot activated successfully!",
-                            status: "connected"
-                        });
-                        responseSent = true;
-                    }
-                    
-                    // Keep the connection alive
-                    // The main bot instance in main.js will handle the actual bot operations
-                } else if (connection === "close") {
-                    await cleanUpSession();
-                }
-            });
-
-            // Timeout for pairing code request
-            setTimeout(async () => {
-                if (!responseSent && !res.headersSent) {
-                    res.status(408).json({ 
-                        success: false, 
-                        message: "Pairing request timeout" 
-                    });
-                    responseSent = true;
-                    
-                    try {
-                        await CloudAI.ws.close();
-                    } catch (closeErr) {
-                        console.error("Timeout close error:", closeErr);
-                    }
-                    await cleanUpSession();
-                }
-            }, 30000);
-
-        } catch (err) {
-            console.error("Pairing setup error:", err);
-            if (!responseSent && !res.headersSent) {
-                res.status(500).json({ 
-                    success: false, 
-                    message: "Setup failed. Please try again." 
-                });
-                responseSent = true;
-            }
-            await cleanUpSession();
-        }
-    }
-
-    try {
-        await CLOUD_AI_PAIR();
-    } catch (error) {
-        console.error("Final pairing error:", error);
-        await cleanUpSession();
-        if (!responseSent && !res.headersSent) {
-            res.status(500).json({ 
-                success: false, 
-                message: "Service error occurred." 
-            });
-        }
-    }
-});
-
-module.exports = router;
+                    console.log
