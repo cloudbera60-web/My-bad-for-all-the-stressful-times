@@ -6,10 +6,14 @@ evt({
     desc: 'Check bot response time'
 }, async (message, sock, match) => {
     const start = Date.now();
-    await sock.sendMessage(message, { text: 'Pong!' }, { quoted: match.m });
-    const latency = Date.now() - start;
     await sock.sendMessage(message, { 
-        text: `🏓 Pong!\n⏱️ Latency: ${latency}ms\n🤖 Bot: CLOUD AI` 
+        text: '🏓 Pong!'
+    }, { quoted: match.m });
+    
+    const latency = Date.now() - start;
+    
+    await sock.sendMessage(message, { 
+        text: `*🤖 CLOUD AI Status*\n\n⏱️ Response Time: *${latency}ms*\n⚡ Status: *Online*\n🌐 Mode: *${match.config.MODE}*`
     }, { quoted: match.m });
 });
 
@@ -18,44 +22,46 @@ evt({
     fromMe: false,
     desc: 'Show all commands'
 }, async (message, sock, match) => {
-    const helpText = `
-🤖 *CLOUD AI COMMANDS*
-
-📊 *Information:*
-• .ping - Check bot speed
-• .help - Show this menu
-• .owner - Contact owner
-• .status - Bot status
-
-🎮 *Fun:*
-• .sticker - Create sticker
-• .attp - Text to sticker
-• .quote - Random quote
-
-🔧 *Tools:*
-• .tts - Text to speech
-• .calc - Calculator
-• .weather - Weather info
-
-📁 *Media:*
-• .toimg - Sticker to image
-• .mp3 - Audio extractor
-
-Use: .help <command> for details
-
-${match.config.FOOTER}`;
-
+    const commands = match.evt.commands;
+    const categories = {};
+    
+    // Organize commands by type
+    commands.forEach(cmd => {
+        const type = cmd.type || 'general';
+        if (!categories[type]) {
+            categories[type] = [];
+        }
+        categories[type].push(cmd);
+    });
+    
+    let helpText = `*🤖 CLOUD AI COMMANDS*\n\n`;
+    helpText += `Prefix: *${match.config.PREFIX}*\n\n`;
+    
+    for (const [category, cmds] of Object.entries(categories)) {
+        helpText += `*${category.toUpperCase()}*\n`;
+        cmds.forEach(cmd => {
+            helpText += `• *${match.config.PREFIX}${cmd.pattern}* - ${cmd.desc}\n`;
+        });
+        helpText += '\n';
+    }
+    
+    helpText += `${match.config.FOOTER}`;
+    
     await sock.sendMessage(message, { 
         text: helpText,
-        contextInfo: {
-            externalAdReply: {
-                title: "CLOUD AI HELP MENU",
-                body: "Powered by Cloud AI",
-                thumbnailUrl: match.config.BOT_PIC,
-                sourceUrl: match.config.BOT_REPO
-            }
-        }
+        ...match.createContext(match.sender, {
+            title: "CLOUD AI HELP MENU",
+            body: "Powered by Cloud AI"
+        })
     }, { quoted: match.m });
 });
 
-// Add more commands as needed...
+evt({
+    pattern: 'owner',
+    fromMe: false,
+    desc: 'Contact bot owner'
+}, async (message, sock, match) => {
+    await sock.sendMessage(message, { 
+        text: `*👤 Bot Owner*\n\n📱 Number: *${match.config.OWNER_NUMBER}*\n👤 Name: *${match.config.OWNER_NAME}*\n\n💬 Contact for support or queries.`
+    }, { quoted: match.m });
+});
