@@ -15,8 +15,6 @@ const {
     evt, 
     logger,
     emojis,
-    gmdStore,
-    commands,
     setSudo,
     delSudo,
     GiftedAutoReact,
@@ -62,7 +60,7 @@ app.get('/health', (req, res) => {
     });
 });
 
-// Main routes
+// Serve HTML pages
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, "public", "index.html"));
 });
@@ -84,8 +82,11 @@ const RECONNECT_DELAY = 5000;
 
 async function startCloudAI() {
     try {
+        console.log("🔄 Starting Cloud AI Bot...");
         const { version } = await fetchLatestBaileysVersion();
         const { state, saveCreds } = await useMultiFileAuthState(sessionDir);
+        
+        console.log("📁 Session loaded from:", sessionDir);
         
         const cloudSock = {
             version,
@@ -107,6 +108,7 @@ async function startCloudAI() {
         };
 
         Gifted = giftedConnect(cloudSock);
+        console.log("🤖 Cloud AI instance created");
 
         Gifted.ev.process(async (events) => {
             if (events['creds.update']) {
@@ -125,7 +127,7 @@ async function startCloudAI() {
                         await GiftedAutoReact(randomEmoji, ms, Gifted);
                     }
                 } catch (err) {
-                    console.error('Auto react error:', err);
+                    // Ignore auto-react errors
                 }
             });
         }
@@ -137,21 +139,25 @@ async function startCloudAI() {
         }
 
         // Anti-call
-        Gifted.ev.on("call", async (json) => {
-            await GiftedAnticall(json, Gifted);
-        });
+        if (config.ANTICALL === "true") {
+            Gifted.ev.on("call", async (json) => {
+                await GiftedAnticall(json, Gifted);
+            });
+        }
 
         // Presence
-        Gifted.ev.on("messages.upsert", async ({ messages }) => {
-            if (messages && messages.length > 0) {
-                await GiftedPresence(Gifted, messages[0].key.remoteJid);
-            }
-        });
+        if (config.PRESENCE === "true") {
+            Gifted.ev.on("messages.upsert", async ({ messages }) => {
+                if (messages && messages.length > 0) {
+                    await GiftedPresence(Gifted, messages[0].key.remoteJid);
+                }
+            });
+        }
 
         // Connection presence
         Gifted.ev.on("connection.update", ({ connection }) => {
             if (connection === "open") {
-                console.log("✅ Cloud AI Connected");
+                console.log("✅ Cloud AI Connected to WhatsApp!");
                 GiftedPresence(Gifted, "status@broadcast");
             }
         });
@@ -163,71 +169,80 @@ async function startCloudAI() {
         }
         
         // Anti-link
-        Gifted.ev.on('messages.upsert', async ({ messages }) => {
-            const message = messages[0];
-            if (!message?.message || message.key.fromMe) return;
-            if (config.ANTILINK !== 'false') {
+        if (config.ANTILINK !== 'false') {
+            Gifted.ev.on('messages.upsert', async ({ messages }) => {
+                const message = messages[0];
+                if (!message?.message || message.key.fromMe) return;
                 await GiftedAntiLink(Gifted, message, config.ANTILINK);
-            }
-        });
-
-        // Status auto-actions
-        Gifted.ev.on('messages.upsert', async (mek) => {
-            try {
-                const msg = mek.messages[0];
-                if (!msg || !msg.message) return;
-
-                const fromJid = msg.key.participant || msg.key.remoteJid;
-                
-                if (msg.key && msg.key?.remoteJid === "status@broadcast" && isJidBroadcast(msg.key.remoteJid)) {
-                    const cloudId = jidNormalizedUser(Gifted.user.id);
-
-                    if (config.AUTO_READ_STATUS === "true") {
-                        await Gifted.readMessages([msg.key, cloudId]);
-                    }
-
-                    if (config.AUTO_LIKE_STATUS === "true" && msg.key.participant) {
-                        const emojisList = config.STATUS_LIKE_EMOJIS?.split(',') || "💛,❤️,💜,🤍,💙";
-                        const randomEmoji = emojisList[Math.floor(Math.random() * emojisList.length)];
-                        await Gifted.sendMessage(
-                            msg.key.remoteJid,
-                            { react: { key: msg.key, text: randomEmoji } },
-                            { statusJidList: [msg.key.participant, cloudId] }
-                        );
-                    }
-
-                    if (config.AUTO_REPLY_STATUS === "true") {
-                        if (msg.key.fromMe) return;
-                        const customMessage = config.STATUS_REPLY_TEXT || '✅ Status Viewed By Cloud AI';
-                        await Gifted.sendMessage(
-                            fromJid,
-                            { text: customMessage },
-                            { quoted: msg }
-                        );
-                    }
-                }
-            } catch (error) {
-                console.error("Status action error:", error);
-            }
-        });
+            });
+        }
 
         // Load commands
         try {
             const commandsPath = path.join(__dirname, "gifted");
             if (fs.existsSync(commandsPath)) {
-                fs.readdirSync(commandsPath).forEach((fileName) => {
-                    if (path.extname(fileName).toLowerCase() === ".js") {
-                        try {
-                            require(path.join(commandsPath, fileName));
-                            console.log(`✅ Loaded command: ${fileName}`);
-                        } catch (e) {
-                            console.error(`❌ Failed to load ${fileName}:`, e.message);
-                        }
+                const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+                console.log(`📂 Found ${commandFiles.length} command files`);
+                
+                commandFiles.forEach((fileName) => {
+                    try {
+                        require(path.join(commandsPath, fileName));
+                        console.log(`✅ Loaded command: ${fileName}`);
+                    } catch (e) {
+                        console.error(`❌ Failed to load ${fileName}:`, e.message);
                     }
                 });
+            } else {
+                console.log("📂 No commands folder found, creating one...");
+                fs.mkdirSync(commandsPath, { recursive: true });
+                
+                // Create basic ping command
+                const pingCode = `const { evt } = require('../gift');
+
+evt({
+    pattern: 'ping',
+    fromMe: false,
+    desc: 'Check bot response time'
+}, async (message, sock, match) => {
+    const start = Date.now();
+    await sock.sendMessage(message, { 
+        text: '🏓 Pong!'
+    }, { quoted: match.m });
+    
+    const latency = Date.now() - start;
+    
+    await sock.sendMessage(message, { 
+        text: \`*🤖 CLOUD AI Status*\\n\\n⏱️ Response Time: *\${latency}ms*\\n⚡ Status: *Online*\\n🌐 Mode: *\${match.config.MODE}*\`
+    }, { quoted: match.m });
+});
+
+evt({
+    pattern: 'help',
+    fromMe: false,
+    desc: 'Show all commands'
+}, async (message, sock, match) => {
+    const commands = match.evt.commands;
+    
+    let helpText = \`*🤖 CLOUD AI COMMANDS*\\n\\n\`;
+    helpText += \`Prefix: *\${match.config.PREFIX}*\\n\\n\`;
+    
+    commands.forEach(cmd => {
+        helpText += \`• *\${match.config.PREFIX}\${cmd.pattern}* - \${cmd.desc}\\n\`;
+    });
+    
+    helpText += \`\\n\${match.config.FOOTER}\`;
+    
+    await sock.sendMessage(message, { 
+        text: helpText
+    }, { quoted: match.m });
+});`;
+                
+                fs.writeFileSync(path.join(commandsPath, 'ping.js'), pingCode);
+                console.log("✅ Created default ping.js command");
+                require(path.join(commandsPath, 'ping.js'));
             }
         } catch (error) {
-            console.error("❌ Error reading commands folder:", error.message);
+            console.error("❌ Error loading commands:", error.message);
         }
 
         // Message handler
@@ -256,10 +271,10 @@ async function startCloudAI() {
             const isCommand = text.startsWith(config.PREFIX);
             const command = isCommand ? text.slice(config.PREFIX.length).trim().split(' ')[0].toLowerCase() : '';
 
-            if (isCommand) {
+            if (isCommand && command) {
                 // Auto read if enabled
                 if (config.AUTO_READ_MESSAGES === "true" || config.AUTO_READ_MESSAGES === "commands") {
-                    await Gifted.readMessages([ms.key]);
+                    await Gifted.readMessages([ms.key]).catch(() => {});
                 }
 
                 // Find command
@@ -273,13 +288,14 @@ async function startCloudAI() {
                     if (config.MODE?.toLowerCase() === "private") {
                         const sudoNumbers = getSudoNumbers() || [];
                         const senderNumber = ms.key.participant?.split('@')[0] || ms.key.remoteJid.split('@')[0];
+                        const ownerNumber = config.OWNER_NUMBER.replace(/\D/g, '');
                         const isAllowed = sudoNumbers.includes(senderNumber) || 
-                                         senderNumber === config.OWNER_NUMBER.replace(/\D/g, '');
+                                         senderNumber === ownerNumber;
                         
                         if (!isAllowed) {
                             await Gifted.sendMessage(from, { 
                                 text: "⚠️ This bot is in private mode. Contact owner for access."
-                            }, { quoted: ms });
+                            }, { quoted: ms }).catch(() => {});
                             return;
                         }
                     }
@@ -298,14 +314,16 @@ async function startCloudAI() {
                             isAdmin: false,
                             isBotAdmin: false,
                             reply: (text) => {
-                                Gifted.sendMessage(from, { text }, { quoted: ms });
+                                Gifted.sendMessage(from, { text }, { quoted: ms }).catch(() => {});
                             },
                             react: async (emoji) => {
                                 await Gifted.sendMessage(from, { 
                                     react: { key: ms.key, text: emoji }
-                                });
+                                }).catch(() => {});
                             },
                             config,
+                            evt,
+                            createContext,
                             args
                         };
 
@@ -315,7 +333,7 @@ async function startCloudAI() {
                         console.error(`Command error [${command}]:`, error);
                         await Gifted.sendMessage(from, {
                             text: `❌ Command error: ${error.message}`
-                        }, { quoted: ms });
+                        }, { quoted: ms }).catch(() => {});
                     }
                 }
             }
@@ -325,20 +343,25 @@ async function startCloudAI() {
         Gifted.ev.on("connection.update", async (update) => {
             const { connection, lastDisconnect } = update;
             
+            if (connection === "connecting") {
+                console.log("🔄 Connecting to WhatsApp...");
+            }
+
             if (connection === "open") {
-                console.log("✅ Cloud AI is online!");
+                console.log("✅ Cloud AI is online and ready!");
                 reconnectAttempts = 0;
                 
                 // Send startup message
-                if (config.STARTING_MESSAGE === "true") {
-                    const startupMsg = `
+                if (config.STARTING_MESSAGE === "true" && Gifted.user?.id) {
+                    try {
+                        const startupMsg = `
 *${config.BOT_NAME} CONNECTED*
 
 🤖 *Bot Info:*
 • Prefix: *${config.PREFIX}*
 • Mode: *${config.MODE}*
 • Version: *${config.VERSION}*
-• Owner: *${config.OWNER_NUMBER}*
+• Owner: *${config.OWNER_NAME}*
 
 🌐 *Links:*
 • Repository: ${config.BOT_REPO}
@@ -346,57 +369,60 @@ async function startCloudAI() {
 
 ${config.CAPTION}`;
 
-                    await Gifted.sendMessage(Gifted.user.id, {
-                        text: startupMsg,
-                        ...createContext(config.BOT_NAME, {
-                            title: "CLOUD AI ONLINE",
-                            body: "Ready to serve!"
-                        })
-                    });
+                        await Gifted.sendMessage(Gifted.user.id, {
+                            text: startupMsg
+                        });
+                        console.log("📨 Startup message sent");
+                    } catch (msgError) {
+                        console.error("Startup message error:", msgError);
+                    }
                 }
             }
 
             if (connection === "close") {
                 const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
-                console.log(`Connection closed: ${reason}`);
+                console.log(`🔌 Connection closed: ${reason}`);
                 
                 if (reason === DisconnectReason.badSession || reason === DisconnectReason.loggedOut) {
-                    console.log("Bad session, please re-authenticate");
+                    console.log("❌ Bad session or logged out. Please re-authenticate.");
                     process.exit(1);
                 } else {
-                    console.log("Reconnecting...");
+                    console.log("🔄 Reconnecting...");
                     setTimeout(reconnectWithRetry, RECONNECT_DELAY);
                 }
             }
         });
 
     } catch (error) {
-        console.error('Bot initialization error:', error);
+        console.error('❌ Bot initialization error:', error.message);
         setTimeout(reconnectWithRetry, RECONNECT_DELAY);
     }
 }
 
 async function reconnectWithRetry() {
     if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-        console.error('Max reconnection attempts reached');
+        console.error('❌ Max reconnection attempts reached');
         process.exit(1);
     }
 
     reconnectAttempts++;
-    console.log(`Reconnection attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}`);
+    const delay = Math.min(RECONNECT_DELAY * Math.pow(2, reconnectAttempts - 1), 30000);
+    
+    console.log(`🔄 Reconnection attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS} in ${delay}ms...`);
     
     setTimeout(() => {
         startCloudAI().catch(err => {
-            console.error('Reconnection failed:', err);
+            console.error('❌ Reconnection failed:', err.message);
             reconnectWithRetry();
         });
-    }, RECONNECT_DELAY * Math.pow(2, reconnectAttempts - 1));
+    }, delay);
 }
 
 // Start the bot
+console.log("🚀 Starting Cloud AI Bot System...");
 setTimeout(() => {
     startCloudAI().catch(err => {
-        console.error("Initialization error:", err);
+        console.error("❌ Initialization error:", err.message);
         reconnectWithRetry();
     });
 }, 3000);
