@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CLOUD AI | PAIR CODE</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLOUD AI | Pair Code</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -13,384 +13,298 @@
             --dark: #0d1b2a;
             --light: #e0e1dd;
             --gray: #8d99ae;
-            --gradient: linear-gradient(135deg, #3a86ff 0%, #4361ee 50%, #06d6a0 100%);
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--dark);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, var(--dark), #1b263b);
             color: var(--light);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(58, 134, 255, 0.15) 0%, transparent 20%),
-                radial-gradient(circle at 90% 80%, rgba(6, 214, 160, 0.15) 0%, transparent 20%);
-            animation: gradientPulse 15s ease infinite;
         }
-
-        @keyframes gradientPulse {
-            0%, 100% { background-position: 10% 20%, 90% 80%; }
-            50% { background-position: 15% 25%, 85% 75%; }
-        }
-
-        .home-btn {
-            position: fixed;
-            top: 1.5rem;
-            right: 1.5rem;
-            background: var(--gradient);
-            color: white;
-            padding: 0.8rem 1.8rem;
-            border-radius: 30px;
-            font-weight: 700;
-            text-decoration: none;
-            box-shadow: var(--shadow);
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            transition: var(--transition);
-            border: none;
-            cursor: pointer;
-            font-size: 0.95rem;
-        }
-
-        .home-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 35px rgba(58, 134, 255, 0.4);
-        }
-
+        
         .container {
             background: rgba(255, 255, 255, 0.05);
-            padding: 3rem;
-            border-radius: 25px;
-            box-shadow: var(--shadow);
-            width: 100%;
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
             max-width: 500px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
+            width: 100%;
             border: 1px solid rgba(58, 134, 255, 0.2);
-            backdrop-filter: blur(20px);
-            animation: fadeIn 0.6s ease-out;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            animation: fadeIn 0.5s ease;
         }
-
-        .container::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: var(--gradient);
-            opacity: 0.05;
-            transform: rotate(30deg);
-            z-index: -1;
-        }
-
+        
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-
+        
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(58, 134, 255, 0.1);
+            color: var(--primary);
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(58, 134, 255, 0.3);
+        }
+        
+        .back-btn:hover {
+            background: rgba(58, 134, 255, 0.2);
+            transform: translateX(-5px);
+        }
+        
         .logo {
             width: 100px;
             height: 100px;
-            margin: 0 auto 2rem;
-            position: relative;
+            margin: 0 auto 20px;
         }
-
+        
         .logo img {
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            object-fit: cover;
             border: 3px solid var(--primary);
-            box-shadow: 0 0 30px rgba(58, 134, 255, 0.4);
-            animation: pulseGlow 2s infinite alternate;
+            box-shadow: 0 0 20px rgba(58, 134, 255, 0.3);
         }
-
-        @keyframes pulseGlow {
-            0% {
-                box-shadow: 0 0 20px rgba(58, 134, 255, 0.4);
-                transform: scale(1);
-            }
-            100% {
-                box-shadow: 0 0 40px rgba(58, 134, 255, 0.6);
-                transform: scale(1.02);
-            }
-        }
-
+        
         h1 {
-            background: var(--gradient);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            margin-bottom: 1rem;
+            margin-bottom: 10px;
             font-size: 2.5rem;
-            font-weight: 900;
-            letter-spacing: -0.5px;
         }
-
-        p {
+        
+        .subtitle {
             color: var(--gray);
-            margin-bottom: 2.5rem;
+            margin-bottom: 30px;
             font-size: 1.1rem;
-            line-height: 1.6;
         }
-
+        
         .form-group {
-            margin-bottom: 2rem;
+            margin-bottom: 25px;
             text-align: left;
         }
-
+        
         label {
             display: block;
-            margin-bottom: 0.8rem;
-            font-weight: 600;
+            margin-bottom: 8px;
             color: var(--light);
-            font-size: 1rem;
+            font-weight: 600;
         }
-
-        .input-container {
+        
+        .input-group {
             position: relative;
-            margin-bottom: 1.5rem;
         }
-
-        .input-container i {
+        
+        .input-group i {
             position: absolute;
-            left: 20px;
+            left: 15px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--gray);
-            font-size: 1.2rem;
         }
-
-        input[type="text"] {
+        
+        input {
             width: 100%;
-            padding: 18px 20px 18px 55px;
-            border: 2px solid rgba(58, 134, 255, 0.3);
-            border-radius: 15px;
+            padding: 15px 15px 15px 45px;
             background: rgba(255, 255, 255, 0.07);
+            border: 2px solid rgba(58, 134, 255, 0.3);
+            border-radius: 10px;
             color: var(--light);
-            font-size: 1.1rem;
-            transition: var(--transition);
-            font-weight: 500;
+            font-size: 1rem;
+            transition: all 0.3s ease;
         }
-
-        input[type="text"]:focus {
+        
+        input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.2);
             background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.2);
         }
-
+        
+        .error {
+            color: #ff6b6b;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            display: none;
+        }
+        
         .btn {
-            background: var(--gradient);
-            color: white;
-            padding: 18px;
-            border: none;
-            border-radius: 15px;
-            cursor: pointer;
-            font-size: 1.1rem;
-            font-weight: 700;
             width: 100%;
-            transition: var(--transition);
-            box-shadow: 0 5px 20px rgba(58, 134, 255, 0.3);
-            position: relative;
-            overflow: hidden;
-            margin-bottom: 1.5rem;
-            letter-spacing: 0.5px;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
         }
-
-        .btn:hover {
+        
+        .btn:hover:not(:disabled) {
             transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(58, 134, 255, 0.4);
+            box-shadow: 0 10px 25px rgba(58, 134, 255, 0.4);
         }
-
-        .btn:active {
-            transform: translateY(-1px);
-        }
-
+        
         .btn:disabled {
             opacity: 0.7;
             cursor: not-allowed;
-            transform: none;
         }
-
-        .btn-text {
-            display: inline-block;
-            transition: var(--transition);
-        }
-
-        .btn-spinner {
+        
+        .loader {
             display: none;
-            animation: spin 1s linear infinite;
-        }
-
-        #result {
-            margin-top: 2rem;
-            padding: 2rem;
-            border-radius: 15px;
-            display: none;
-            animation: fadeIn 0.3s ease-out;
-            text-align: center;
-            background: rgba(58, 134, 255, 0.1);
-            border-left: 4px solid var(--primary);
-        }
-
-        .spinner {
             width: 50px;
             height: 50px;
-            margin: 2rem auto;
+            margin: 30px auto;
             border: 4px solid rgba(58, 134, 255, 0.2);
             border-top: 4px solid var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            display: none;
         }
-
+        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        #pair-code {
-            font-size: 1.8rem;
+        
+        .result {
+            display: none;
+            margin-top: 30px;
+            padding: 25px;
+            background: rgba(58, 134, 255, 0.1);
+            border-radius: 15px;
+            border-left: 4px solid var(--primary);
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .code {
+            font-size: 2rem;
             font-weight: 800;
             color: var(--primary);
-            margin: 1.5rem 0;
-            letter-spacing: 2px;
-            text-shadow: 0 0 15px rgba(58, 134, 255, 0.3);
-            animation: textGlow 2s infinite alternate;
-            padding: 1rem;
+            margin: 15px 0;
+            letter-spacing: 3px;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 0 10px rgba(58, 134, 255, 0.3);
+            padding: 15px;
             background: rgba(0, 0, 0, 0.2);
             border-radius: 10px;
-            font-family: 'Courier New', monospace;
         }
-
-        @keyframes textGlow {
-            0% {
-                text-shadow: 0 0 10px rgba(58, 134, 255, 0.3);
-                transform: scale(1);
-            }
-            100% {
-                text-shadow: 0 0 20px rgba(58, 134, 255, 0.5);
-                transform: scale(1.02);
-            }
+        
+        .instructions {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: left;
         }
-
+        
+        .instructions h3 {
+            color: var(--light);
+            margin-bottom: 10px;
+        }
+        
+        .instructions ol {
+            padding-left: 20px;
+            color: var(--gray);
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
         .action-buttons {
             display: flex;
-            gap: 1.2rem;
-            margin-top: 2rem;
+            gap: 15px;
+            margin-top: 20px;
         }
-
+        
         .action-btn {
             flex: 1;
-            padding: 15px;
-            border-radius: 12px;
-            font-weight: 700;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
             cursor: pointer;
-            transition: var(--transition);
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.8rem;
-            font-size: 1rem;
-            border: none;
+            gap: 8px;
         }
-
+        
         .copy-btn {
             background: var(--primary);
             color: white;
         }
-
+        
         .copy-btn:hover {
             background: var(--secondary);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(58, 134, 255, 0.3);
         }
-
-        .back-btn {
+        
+        .new-btn {
             background: transparent;
             color: var(--primary);
             border: 2px solid var(--primary);
-            text-decoration: none;
         }
-
-        .back-btn:hover {
+        
+        .new-btn:hover {
             background: rgba(58, 134, 255, 0.1);
-            transform: translateY(-2px);
         }
-
-        .error-message {
-            color: #ff4757;
-            margin-top: 0.8rem;
-            font-size: 0.9rem;
-            display: none;
-            animation: shake 0.5s;
-            font-weight: 500;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
-
-        .success-message {
+        
+        .success {
             color: var(--accent);
-            margin-top: 1.5rem;
-            display: none;
+            margin-top: 15px;
             font-weight: 600;
-            font-size: 1rem;
-            animation: fadeIn 0.3s;
+            display: none;
+            animation: fadeIn 0.3s ease;
         }
-
-        .instructions {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 1.5rem;
-            border-radius: 12px;
-            margin-top: 2rem;
-            text-align: left;
+        
+        .connected {
+            display: none;
+            background: rgba(6, 214, 160, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 30px;
+            border: 2px solid var(--accent);
+            animation: fadeIn 0.5s ease;
         }
-
-        .instructions h3 {
-            color: var(--light);
-            margin-bottom: 1rem;
-            font-size: 1.2rem;
+        
+        .connected i {
+            font-size: 3rem;
+            color: var(--accent);
+            margin-bottom: 15px;
         }
-
-        .instructions ol {
-            color: var(--gray);
-            padding-left: 1.5rem;
-            line-height: 1.8;
-        }
-
-        .instructions li {
-            margin-bottom: 0.8rem;
-        }
-
+        
         @media (max-width: 768px) {
             .container {
-                padding: 2rem;
+                padding: 30px 20px;
             }
             
             h1 {
@@ -399,61 +313,19 @@
             
             .action-buttons {
                 flex-direction: column;
-                gap: 1rem;
             }
             
-            .action-btn {
-                width: 100%;
-            }
-            
-            .home-btn {
-                top: 1rem;
-                right: 1rem;
-                padding: 0.7rem 1.5rem;
+            .back-btn {
+                top: 10px;
+                left: 10px;
+                padding: 8px 15px;
                 font-size: 0.9rem;
             }
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                padding: 1.5rem;
-            }
-            
-            h1 {
-                font-size: 1.8rem;
-            }
-            
-            .logo {
-                width: 80px;
-                height: 80px;
-            }
-        }
-
-        .connection-success {
-            display: none;
-            background: rgba(6, 214, 160, 0.1);
-            padding: 2rem;
-            border-radius: 15px;
-            margin-top: 2rem;
-            border: 2px solid var(--accent);
-            animation: fadeIn 0.5s;
-        }
-
-        .connection-success i {
-            font-size: 3rem;
-            color: var(--accent);
-            margin-bottom: 1rem;
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
         }
     </style>
 </head>
 <body>
-    <a href="./" class="home-btn">
+    <a href="/" class="back-btn">
         <i class="fas fa-arrow-left"></i> Back to Home
     </a>
     
@@ -462,39 +334,29 @@
             <img src="https://files.catbox.moe/52699c.jpg" alt="CLOUD AI">
         </div>
         
-        <h1>CLOUD AI PAIR CODE</h1>
-        <p>Enter your WhatsApp number to generate a pairing code</p>
+        <h1>CLOUD AI</h1>
+        <p class="subtitle">Enter your WhatsApp number to generate a pairing code</p>
         
         <div class="form-group">
-            <label for="phone-number">📱 WhatsApp Number</label>
-            <div class="input-container">
+            <label for="phone">📱 WhatsApp Number</label>
+            <div class="input-group">
                 <i class="fas fa-phone"></i>
-                <input type="text" id="phone-number" 
-                       placeholder="Example: 254712345678" 
-                       inputmode="numeric" 
-                       pattern="[0-9]*"
-                       maxlength="15">
+                <input type="tel" id="phone" placeholder="Example: 254712345678" maxlength="15">
             </div>
-            <div class="error-message" id="error-message">
-                Please enter a valid 10-15 digit phone number
-            </div>
+            <div class="error" id="error">Please enter a valid 10-15 digit phone number</div>
         </div>
         
-        <button id="submit" class="btn">
-            <span class="btn-text" id="btn-text">Generate Pairing Code</span>
-            <span class="btn-spinner" id="btn-spinner">
-                <i class="fas fa-spinner"></i>
-            </span>
+        <button class="btn" id="generateBtn">
+            <span id="btnText">Generate Pairing Code</span>
+            <i class="fas fa-spinner fa-spin" id="btnSpinner" style="display: none;"></i>
         </button>
         
-        <div class="spinner" id="loading-spinner"></div>
+        <div class="loader" id="loader"></div>
         
-        <div id="result">
+        <div class="result" id="result">
             <h3>🔑 Your Pairing Code</h3>
-            <div id="pair-code"></div>
-            <p style="color: var(--gray); margin: 1.5rem 0;">
-                This code will expire in a few minutes
-            </p>
+            <div class="code" id="pairCode"></div>
+            <p style="color: var(--gray); margin: 15px 0;">This code will expire in a few minutes</p>
             
             <div class="instructions">
                 <h3>📝 How to Use:</h3>
@@ -508,153 +370,145 @@
             </div>
             
             <div class="action-buttons">
-                <button id="copy-btn" class="action-btn copy-btn">
+                <button class="action-btn copy-btn" id="copyBtn">
                     <i class="fas fa-copy"></i> Copy Code
                 </button>
-                <button id="new-btn" class="action-btn back-btn">
+                <button class="action-btn new-btn" id="newBtn">
                     <i class="fas fa-redo"></i> New Code
                 </button>
             </div>
             
-            <div class="success-message" id="success-message">
+            <div class="success" id="success">
                 <i class="fas fa-check-circle"></i> Code copied to clipboard!
             </div>
         </div>
-
-        <div class="connection-success" id="connection-success">
+        
+        <div class="connected" id="connected">
             <i class="fas fa-check-circle"></i>
-            <h3>✅ Connection Successful!</h3>
-            <p style="color: var(--gray); margin: 1rem 0;">
+            <h3>✅ Connected Successfully!</h3>
+            <p style="color: var(--gray); margin: 10px 0;">
                 Cloud AI bot is now connected to your WhatsApp.<br>
                 You can start using commands with prefix <strong>.</strong>
             </p>
-            <p style="color: var(--accent); font-weight: 600; margin-top: 1.5rem;">
+            <p style="color: var(--accent); font-weight: 600; margin-top: 15px;">
                 Try: <code>.ping</code> to test the bot
             </p>
         </div>
     </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.0.0-alpha.1/axios.min.js"></script>
+    
     <script>
         // DOM Elements
-        const elements = {
-            submit: document.getElementById('submit'),
-            phoneNumber: document.getElementById('phone-number'),
-            result: document.getElementById('result'),
-            pairCode: document.getElementById('pair-code'),
-            copyBtn: document.getElementById('copy-btn'),
-            newBtn: document.getElementById('new-btn'),
-            errorMessage: document.getElementById('error-message'),
-            successMessage: document.getElementById('success-message'),
-            loadingSpinner: document.getElementById('loading-spinner'),
-            connectionSuccess: document.getElementById('connection-success'),
-            btnText: document.getElementById('btn-text'),
-            btnSpinner: document.getElementById('btn-spinner')
-        };
-
-        // Validation
-        function validatePhoneNumber(number) {
+        const phoneInput = document.getElementById('phone');
+        const generateBtn = document.getElementById('generateBtn');
+        const btnText = document.getElementById('btnText');
+        const btnSpinner = document.getElementById('btnSpinner');
+        const loader = document.getElementById('loader');
+        const result = document.getElementById('result');
+        const pairCode = document.getElementById('pairCode');
+        const copyBtn = document.getElementById('copyBtn');
+        const newBtn = document.getElementById('newBtn');
+        const success = document.getElementById('success');
+        const connected = document.getElementById('connected');
+        const error = document.getElementById('error');
+        
+        // Format phone input
+        phoneInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            e.target.value = value;
+            error.style.display = 'none';
+        });
+        
+        // Validate phone number
+        function validatePhone(number) {
             const cleaned = number.replace(/\D/g, '');
             return cleaned.length >= 10 && cleaned.length <= 15;
         }
-
-        // Format phone number
-        function formatPhoneNumber(input) {
-            let value = input.replace(/\D/g, '');
-            if (value.length > 0) {
-                value = value.replace(/^(\d{3})(\d+)/, '$1 $2');
-            }
-            return value;
-        }
-
-        // Event Listeners
-        elements.phoneNumber.addEventListener('input', (e) => {
-            e.target.value = formatPhoneNumber(e.target.value);
-            if (elements.errorMessage.style.display === 'block') {
-                elements.errorMessage.style.display = 'none';
-            }
-        });
-
-        elements.submit.addEventListener('click', async () => {
-            const phoneNumber = elements.phoneNumber.value.replace(/\s/g, '');
+        
+        // Generate pairing code
+        generateBtn.addEventListener('click', async function() {
+            const phone = phoneInput.value;
             
-            if (!validatePhoneNumber(phoneNumber)) {
-                elements.errorMessage.style.display = 'block';
-                elements.errorMessage.style.animation = 'shake 0.5s';
+            if (!validatePhone(phone)) {
+                error.style.display = 'block';
+                error.style.animation = 'none';
                 setTimeout(() => {
-                    elements.errorMessage.style.animation = '';
-                }, 500);
+                    error.style.animation = 'fadeIn 0.5s ease';
+                }, 10);
                 return;
             }
             
-            // Show loading
-            elements.btnText.style.display = 'none';
-            elements.btnSpinner.style.display = 'inline-block';
-            elements.submit.disabled = true;
-            elements.loadingSpinner.style.display = 'block';
+            // Show loading state
+            btnText.textContent = 'Generating...';
+            btnSpinner.style.display = 'inline-block';
+            generateBtn.disabled = true;
+            loader.style.display = 'block';
             
             try {
-                const response = await axios.get(`/pair?number=${phoneNumber}`);
+                // Make API request
+                const response = await fetch(`/pair?number=${encodeURIComponent(phone)}`);
+                const data = await response.json();
                 
-                if (response.data.success) {
+                if (data.success) {
                     // Show pairing code
-                    elements.pairCode.textContent = response.data.code;
-                    elements.result.style.display = 'block';
-                    elements.result.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    pairCode.textContent = data.code;
+                    result.style.display = 'block';
+                    result.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     
-                    // Monitor connection (simulated)
+                    // Simulate connection after 10 seconds
                     setTimeout(() => {
-                        elements.result.style.display = 'none';
-                        elements.connectionSuccess.style.display = 'block';
-                        elements.connectionSuccess.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }, 10000); // Show success after 10 seconds
+                        result.style.display = 'none';
+                        connected.style.display = 'block';
+                        connected.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 10000);
                 } else {
-                    elements.pairCode.textContent = "ERROR: " + response.data.message;
-                    elements.result.style.display = 'block';
+                    pairCode.textContent = 'ERROR: ' + (data.message || 'Failed to generate code');
+                    result.style.display = 'block';
                 }
-            } catch (error) {
-                console.error("Request failed:", error);
-                elements.pairCode.textContent = "SERVICE UNAVAILABLE";
-                elements.result.style.display = 'block';
+            } catch (err) {
+                console.error('Error:', err);
+                pairCode.textContent = 'SERVICE UNAVAILABLE';
+                result.style.display = 'block';
             } finally {
-                // Reset loading state
-                elements.btnText.style.display = 'inline-block';
-                elements.btnSpinner.style.display = 'none';
-                elements.submit.disabled = false;
-                elements.loadingSpinner.style.display = 'none';
+                // Reset button state
+                btnText.textContent = 'Generate Pairing Code';
+                btnSpinner.style.display = 'none';
+                generateBtn.disabled = false;
+                loader.style.display = 'none';
             }
         });
-
-        elements.copyBtn.addEventListener('click', () => {
-            const code = elements.pairCode.textContent;
-            if (code && code !== "ERROR: " && code !== "SERVICE UNAVAILABLE") {
+        
+        // Copy code to clipboard
+        copyBtn.addEventListener('click', function() {
+            const code = pairCode.textContent;
+            if (code && !code.startsWith('ERROR') && code !== 'SERVICE UNAVAILABLE') {
                 navigator.clipboard.writeText(code).then(() => {
-                    elements.successMessage.style.display = 'block';
+                    success.style.display = 'block';
                     setTimeout(() => {
-                        elements.successMessage.style.display = 'none';
+                        success.style.display = 'none';
                     }, 3000);
                 });
             }
         });
-
-        elements.newBtn.addEventListener('click', () => {
-            elements.result.style.display = 'none';
-            elements.connectionSuccess.style.display = 'none';
-            elements.phoneNumber.value = '';
-            elements.phoneNumber.focus();
+        
+        // Generate new code
+        newBtn.addEventListener('click', function() {
+            result.style.display = 'none';
+            connected.style.display = 'none';
+            phoneInput.value = '';
+            phoneInput.focus();
         });
-
-        // Auto-focus on input
-        window.addEventListener('load', () => {
-            elements.phoneNumber.focus();
-        });
-
+        
         // Enter key support
-        elements.phoneNumber.addEventListener('keypress', (e) => {
+        phoneInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
-                elements.submit.click();
+                generateBtn.click();
             }
+        });
+        
+        // Focus on input on load
+        window.addEventListener('load', function() {
+            phoneInput.focus();
         });
     </script>
 </body>
-    </html>
+</html>
