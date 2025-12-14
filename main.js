@@ -6,7 +6,7 @@ const {
     downloadContentFromMessage,
     DisconnectReason, 
     getContentType,
-    fetchLatestWaWebVersion, 
+    fetchLatestBaileysVersion, 
     useMultiFileAuthState, 
     makeCacheableSignalKeyStore
 } = require("@whiskeysockets/baileys");
@@ -19,33 +19,17 @@ const {
     commands,
     setSudo,
     delSudo,
-    GiftedTechApi,
-    GiftedApiKey,
     GiftedAutoReact,
     GiftedAntiLink,
     GiftedAutoBio,
     GiftedChatBot,
     loadSession,
-    getMediaBuffer,
     getSudoNumbers,
-    getFileContentType,
-    bufferToStream,
-    uploadToPixhost,
-    uploadToImgBB,
-    setCommitHash, 
-    getCommitHash,
-    gmdBuffer, gmdJson, 
-    formatAudio, formatVideo,
-    uploadToGithubCdn,
-    uploadToGiftedCdn,
-    uploadToPasteboard,
-    uploadToCatbox,
-    GiftedAnticall,
     createContext, 
     createContext2,
-    verifyJidState,
     GiftedPresence,
-    GiftedAntiDelete
+    GiftedAntiDelete,
+    GiftedAnticall
 } = require("./gift");
 
 const pino = require("pino");
@@ -78,6 +62,15 @@ app.get('/health', (req, res) => {
     });
 });
 
+// Main routes
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+app.get('/pair-page', (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "pair.html"));
+});
+
 app.listen(PORT, () => {
     console.log(`✅ Cloud AI Server running on port ${PORT}`);
 });
@@ -85,20 +78,14 @@ app.listen(PORT, () => {
 // Bot initialization
 const sessionDir = path.join(__dirname, "session");
 let Gifted;
-let store;
 let reconnectAttempts = 0;
 const MAX_RECONNECT_ATTEMPTS = 50;
 const RECONNECT_DELAY = 5000;
 
 async function startCloudAI() {
     try {
-        const { version, isLatest } = await fetchLatestWaWebVersion();
+        const { version } = await fetchLatestBaileysVersion();
         const { state, saveCreds } = await useMultiFileAuthState(sessionDir);
-        
-        if (store) {
-            store.destroy();
-        }
-        store = new gmdStore();
         
         const cloudSock = {
             version,
@@ -109,10 +96,6 @@ async function startCloudAI() {
                 keys: makeCacheableSignalKeyStore(state.keys, logger)
             },
             getMessage: async (key) => {
-                if (store) {
-                    const msg = store.loadMessage(key.remoteJid, key.id);
-                    return msg?.message || undefined;
-                }
                 return { conversation: 'Hello from Cloud AI' };
             },
             connectTimeoutMs: 60000,
@@ -120,32 +103,10 @@ async function startCloudAI() {
             keepAliveIntervalMs: 10000,
             markOnlineOnConnect: true,
             syncFullHistory: false,
-            generateHighQualityLinkPreview: false,
-            patchMessageBeforeSending: (message) => {
-                const requiresPatch = !!(
-                    message.buttonsMessage ||
-                    message.templateMessage ||
-                    message.listMessage
-                );
-                if (requiresPatch) {
-                    message = {
-                        viewOnceMessage: {
-                            message: {
-                                messageContextInfo: {
-                                    deviceListMetadataVersion: 2,
-                                    deviceListMetadata: {},
-                                },
-                                ...message,
-                            },
-                        },
-                    };
-                }
-                return message;
-            }
+            generateHighQualityLinkPreview: false
         };
 
         Gifted = giftedConnect(cloudSock);
-        store.bind(Gifted.ev);
 
         Gifted.ev.process(async (events) => {
             if (events['creds.update']) {
